@@ -1,0 +1,61 @@
+.backdrop {
+  display: none; position: fixed; inset: 0; z-index: 60;
+  background: color-mix(in oklab, var(--bg) 55%, rgba(0,0,0,0.45));
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  align-items: center; justify-content: center; padding: 32px;
+  animation: dcFade 200ms ease both;
+}
+.backdropOpen { display: flex; }
+.modal {
+  width: 100%; max-width: 620px; max-height: 86vh; overflow-y: auto; background: var(--panel);
+  border: 1px solid var(--line); border-radius: 26px; box-shadow: 0 32px 80px rgba(0,0,0,0.28);
+  animation: dcSheet 320ms cubic-bezier(0.32,0.72,0,1) both;
+}
+.shot {
+  position: relative; height: 200px; border-radius: 25px 25px 0 0; background-color: var(--soft);
+  background-image: repeating-linear-gradient(135deg, transparent 0 9px, color-mix(in oklab, var(--ink) 7%, transparent) 9px 10px);
+  display: flex; align-items: flex-end; padding: 14px;
+}
+.shotTag {
+  font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--ink-3); background: var(--panel); border: 1px solid var(--line); padding: 4px 8px; border-radius: 7px;
+}
+.closeBtn {
+  position: absolute; top: 14px; right: 14px; appearance: none; cursor: pointer; width: 32px; height: 32px;
+  border-radius: 999px; border: 1px solid var(--line); background: var(--panel); color: var(--ink-2);
+  font-size: 15px; line-height: 1; display: flex; align-items: center; justify-content: center; transition: all 160ms ease;
+}
+.closeBtn:hover { color: var(--ink); border-color: var(--ink-3); }
+.body { padding: 26px 30px 30px; }
+.body h3 { margin: 0; font-size: 26px; font-weight: 550; letter-spacing: -0.028em; }
+.meta { margin-top: 18px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.metaCell { background: var(--bg); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; }
+.metaWide { grid-column: span 2; }
+.metaVal { margin-top: 5px; font-size: 13.5px; font-weight: 520; letter-spacing: -0.01em; }
+.body p { margin: 22px 0 0; font-size: 16px; line-height: 1.62; color: var(--ink); text-wrap: pretty; letter-spacing: -0.01em; }
+.body p.muted { margin-top: 14px; color: var(--ink-2); }
+.techLabel { margin-top: 24px; }
+.tech { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; }
+.techTag { padding: 7px 13px; border-radius: 999px; background: var(--bg); border: 1px solid var(--line); font-size: 13px; font-weight: 500; color: var(--ink-2); }
+.actions { margin-top: 28px; display: flex; gap: 10px; flex-wrap: wrap; }
+
+.btnPrimary {
+  display: inline-flex; align-items: center; padding: 11px 20px; border-radius: 13px;
+  background: var(--ink); color: var(--bg); font-size: 14.5px; font-weight: 520; letter-spacing: -0.01em;
+  white-space: nowrap; transition: opacity 160ms ease;
+}
+.btnPrimary:hover { opacity: 0.84; }
+.btnOutline {
+  appearance: none; cursor: pointer; font-family: inherit; padding: 11px 20px; border-radius: 13px;
+  border: 1px solid var(--line); background: var(--bg); color: var(--ink); font-size: 14.5px; font-weight: 520;
+  letter-spacing: -0.01em; white-space: nowrap; transition: border-color 160ms ease;
+}
+.btnOutline:hover { border-color: var(--ink-3); }
+
+@keyframes dcFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes dcSheet { from { opacity: 0; transform: translateY(22px) scale(0.97); } to { opacity: 1; transform: none; } }
+
+@media (max-width: 720px) {
+  .meta { grid-template-columns: 1fr; }
+  .metaWide { grid-column: span 1; }
+}
