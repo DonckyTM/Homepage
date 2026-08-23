@@ -1,0 +1,42 @@
+.siteHeader {
+  position: sticky; top: 0; z-index: 20;
+  background: color-mix(in oklab, var(--bg) 72%, transparent);
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+.headerInner {
+  max-width: 940px; margin: 0 auto; padding: 14px 24px;
+  display: flex; align-items: center; gap: 20px;
+}
+.brand { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; }
+.brandMark {
+  width: 26px; height: 26px; border-radius: 9px; background: var(--ink); color: var(--bg);
+  display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; letter-spacing: -0.02em;
+}
+.brandName { font-size: 14.5px; font-weight: 560; letter-spacing: -0.015em; }
+
+.tabs {
+  margin-left: auto; display: flex; align-items: center; gap: 2px;
+  background: var(--soft); border: 1px solid var(--line-2); padding: 3px; border-radius: 13px;
+}
+.tabBtn {
+  appearance: none; border: 0; cursor: pointer; font-family: inherit; font-size: 13.5px; font-weight: 500;
+  letter-spacing: -0.01em; padding: 7px 14px; border-radius: 10px; transition: all 160ms ease;
+  background: transparent; color: var(--ink-3);
+}
+.tabBtnActive { background: var(--panel); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
+
+.headerActions { display: flex; align-items: center; gap: 6px; flex: 0 0 auto; }
+.btnLang, .btnTheme {
+  appearance: none; cursor: pointer; border-radius: 11px; border: 1px solid var(--line);
+  background: var(--panel); color: var(--ink-2); transition: all 160ms ease;
+}
+.btnLang { font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; font-weight: 500; letter-spacing: 0.04em; white-space: nowrap; height: 32px; padding: 0 14px; }
+.btnTheme { font-size: 14px; height: 32px; width: 34px; display: flex; align-items: center; justify-content: center; }
+.btnLang:hover, .btnTheme:hover { border-color: var(--ink-3); color: var(--ink); }
+
+@media (max-width: 720px) {
+  .headerInner { flex-wrap: wrap; }
+  .tabs { order: 3; width: 100%; margin-left: 0; overflow-x: auto; }
+}

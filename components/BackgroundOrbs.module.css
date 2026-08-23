@@ -1,0 +1,5 @@
+.orbs { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+.orb { position: absolute; border-radius: 999px; will-change: transform; }
+.orbA { top: -12vh; left: -6vw; width: 62vw; height: 62vw; background: radial-gradient(circle at 50% 50%, var(--glow-a), transparent 68%); filter: blur(24px); }
+.orbB { top: 34vh; right: -14vw; width: 52vw; height: 52vw; background: radial-gradient(circle at 50% 50%, var(--glow-b), transparent 68%); filter: blur(24px); }
+.orbC { bottom: -22vh; left: 22vw; width: 46vw; height: 46vw; background: radial-gradient(circle at 50% 50%, var(--glow-a), transparent 70%); filter: blur(30px); }

@@ -8,16 +8,26 @@ Thumbs.db
 *.swp
 *.swo
 
-# Node (in case tooling gets added later)
+# Node
 node_modules/
 npm-debug.log*
 yarn-error.log*
+yarn-debug.log*
 pnpm-debug.log*
 
 # Env / secrets
 .env
 .env.local
 .env.*.local
+
+# Next.js
+/.next/
+/out/
+next-env.d.ts
+*.tsbuildinfo
+
+# Vercel
+.vercel
 
 # Build output
 dist/
