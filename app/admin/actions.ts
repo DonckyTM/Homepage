@@ -523,9 +523,18 @@ export async function updateMilestoneInline(
   refresh();
 }
 
+const MONTHS_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTHS_DE = ["Jan.", "Feb.", "Mär.", "Apr.", "Mai", "Jun.", "Jul.", "Aug.", "Sep.", "Okt.", "Nov.", "Dez."];
+
 export async function toggleMilestoneDoneInline(id: string, done: boolean) {
   const supabase = await createClient();
-  const { error } = await supabase.from("milestones").update({ done }).eq("id", id);
+
+  const now = new Date();
+  const update = done
+    ? { done, date_en: `${MONTHS_EN[now.getMonth()]} ${now.getFullYear()}`, date_de: `${MONTHS_DE[now.getMonth()]} ${now.getFullYear()}` }
+    : { done, date_en: "open", date_de: "offen" };
+
+  const { error } = await supabase.from("milestones").update(update).eq("id", id);
 
   if (error) {
     throw new Error(`Failed to update milestone: ${error.message}`);
