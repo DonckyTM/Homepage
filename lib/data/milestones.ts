@@ -7,7 +7,7 @@ export async function getMilestones(): Promise<Milestone[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("milestones")
-    .select("title_de, title_en, note_de, note_en, date_de, date_en, done, order")
+    .select("id, title_de, title_en, note_de, note_en, date_de, date_en, done, order")
     .order("order");
 
   if (error) {
@@ -15,6 +15,7 @@ export async function getMilestones(): Promise<Milestone[]> {
   }
 
   return (data ?? []).map((row) => ({
+    id: row.id,
     order: row.order,
     title: { de: row.title_de, en: row.title_en },
     note: { de: row.note_de, en: row.note_en },

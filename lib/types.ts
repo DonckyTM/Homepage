@@ -49,6 +49,7 @@ export interface Project {
 }
 
 export interface Milestone {
+  id: string;
   order: number;
   title: Localized;
   note: Localized;
