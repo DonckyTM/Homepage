@@ -44,6 +44,7 @@ export interface Project {
   year: Localized;
   techTags: string[];
   repoUrl: string;
+  screenshotPath: string | null;
   screenshotLabel: Localized;
   inProgress: boolean;
 }
