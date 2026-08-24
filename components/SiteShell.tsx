@@ -8,6 +8,7 @@ import { AboutSection } from "@/components/AboutSection";
 import { ProjectsSection } from "@/components/ProjectsSection";
 import { CurrentSection } from "@/components/CurrentSection";
 import { ProjectModal } from "@/components/ProjectModal";
+import { ContactModal } from "@/components/ContactModal";
 import { Footer } from "@/components/Footer";
 import { useSiteState } from "@/lib/useSiteState";
 import { EditModeProvider } from "@/components/admin/EditContext";
@@ -34,7 +35,20 @@ export function SiteShell({
   tabs,
   editable = false
 }: SiteShellProps) {
-  const { tab, goTab, lang, toggleLang, theme, toggleTheme, openId, openModal, closeModal } = useSiteState();
+  const {
+    tab,
+    goTab,
+    lang,
+    toggleLang,
+    theme,
+    toggleTheme,
+    openId,
+    openModal,
+    closeModal,
+    contactOpen,
+    openContact,
+    closeContact
+  } = useSiteState();
 
   return (
     <EditModeProvider enabled={editable}>
@@ -53,7 +67,13 @@ export function SiteShell({
 
         <main className={styles.main}>
           {tab === "home" && (
-            <HomeSection texts={siteTexts} facts={homeFacts} lang={lang} onGoCurrent={() => goTab("current")} />
+            <HomeSection
+              texts={siteTexts}
+              facts={homeFacts}
+              lang={lang}
+              onGoCurrent={() => goTab("current")}
+              onOpenContact={openContact}
+            />
           )}
           {tab === "about" && <AboutSection texts={siteTexts} facts={aboutFacts} stack={stack} lang={lang} />}
           {tab === "projects" && (
@@ -63,6 +83,7 @@ export function SiteShell({
         </main>
 
         <ProjectModal texts={siteTexts} projects={projects} lang={lang} openId={openId} onClose={closeModal} />
+        <ContactModal texts={siteTexts} lang={lang} open={contactOpen} onClose={closeContact} />
 
         <Footer />
       </div>

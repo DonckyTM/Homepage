@@ -15,6 +15,7 @@ export function useSiteState() {
   const [lang, setLang] = useState<Lang>("en");
   const [theme, setTheme] = useState<Theme>("light");
   const [openId, setOpenId] = useState<string | null>(null);
+  const [contactOpen, setContactOpen] = useState(false);
 
   useEffect(() => {
     try {
@@ -63,16 +64,34 @@ export function useSiteState() {
 
   const openModal = useCallback((id: string) => setOpenId(id), []);
   const closeModal = useCallback(() => setOpenId(null), []);
+  const openContact = useCallback(() => setContactOpen(true), []);
+  const closeContact = useCallback(() => setContactOpen(false), []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") closeModal();
+      if (e.key === "Escape") {
+        closeModal();
+        closeContact();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [closeModal]);
+  }, [closeModal, closeContact]);
 
-  return { tab, goTab, lang, toggleLang, theme, toggleTheme, openId, openModal, closeModal };
+  return {
+    tab,
+    goTab,
+    lang,
+    toggleLang,
+    theme,
+    toggleTheme,
+    openId,
+    openModal,
+    closeModal,
+    contactOpen,
+    openContact,
+    closeContact
+  };
 }
 
 export function useOrbParallax() {

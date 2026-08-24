@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Lang, TabDef, TabId, Theme } from "@/lib/types";
 import { useEditMode } from "@/components/admin/EditContext";
@@ -57,6 +58,11 @@ export function Header({ tabs, tab, lang, theme, onTabChange, onToggleLang, onTo
           <button className={styles.btnTheme} title="Theme" onClick={onToggleTheme}>
             {theme === "dark" ? "☀" : "☾"}
           </button>
+          {editMode && (
+            <Link href="/admin/contact" className={styles.btnLang} title="Contact submissions">
+              Inbox
+            </Link>
+          )}
           {editMode && (
             <button className={styles.btnTheme} title="Log out" aria-label="Log out" onClick={handleLogout}>
               ⏻

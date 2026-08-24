@@ -12,9 +12,10 @@ interface HomeSectionProps {
   facts: HomeFact[];
   lang: Lang;
   onGoCurrent: () => void;
+  onOpenContact: () => void;
 }
 
-export function HomeSection({ texts: t, facts: homeFacts, lang, onGoCurrent }: HomeSectionProps) {
+export function HomeSection({ texts: t, facts: homeFacts, lang, onGoCurrent, onOpenContact }: HomeSectionProps) {
   return (
     <>
       <div className={styles.hero}>
@@ -27,9 +28,9 @@ export function HomeSection({ texts: t, facts: homeFacts, lang, onGoCurrent }: H
 
         <div className={styles.heroActions}>
           <EditableWrap textKey="ctaMail" value={t.ctaMail}>
-            <a href="mailto:florian@dehm-online.de" className={styles.btnPrimary}>
+            <button type="button" className={styles.btnPrimary} onClick={onOpenContact}>
               {t.ctaMail[lang]}
-            </a>
+            </button>
           </EditableWrap>
           <a href="https://github.com/DonckyTM" target="_blank" rel="noreferrer" className={styles.btnSecondary}>
             GitHub
