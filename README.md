@@ -31,6 +31,19 @@ npm run dev
 Then open `http://localhost:3000`. A matching [`.claude/launch.json`](.claude/launch.json) config
 is included for previewing inside Claude Code.
 
+### Environment variables
+
+Copy `.env.local.example` to `.env.local` and fill in the values from your Supabase project's
+dashboard (Project Settings → API):
+
+| Variable | Purpose |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | Your project's API URL. Safe to expose in the client bundle. |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | The public anon key, used by the browser client (`lib/supabase/client.ts`). Safe to expose in the client bundle. |
+| `SUPABASE_SERVICE_ROLE_KEY` | The service role key, from Project Settings → API → service_role. **Server-side only** — never use it in client components or in a `NEXT_PUBLIC_*` variable, since it bypasses Row Level Security. |
+
+`.env.local` is git-ignored and never committed.
+
 ## Deploying
 
 Target platform is Vercel — connect the repo and it builds with the default Next.js settings, no
