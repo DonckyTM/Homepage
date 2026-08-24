@@ -1,17 +1,17 @@
-import { AboutFact } from "@/lib/types";
+import { HomeFact } from "@/lib/types";
 import { createClient } from "@/lib/supabase/server";
 
-// About – Fakten-Tabelle: Rolle, Unternehmen, Lehrjahr, Standort, Schwerpunkt.
-// Loaded from the `about_facts` table, ordered by "order".
-export async function getAboutFacts(): Promise<AboutFact[]> {
+// Home tab fact cards: role, based in, focus. Loaded from the `home_facts`
+// table, ordered by "order".
+export async function getHomeFacts(): Promise<HomeFact[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
-    .from("about_facts")
+    .from("home_facts")
     .select("id, label_de, label_en, value_de, value_en, order")
     .order("order");
 
   if (error) {
-    throw new Error(`Failed to load about_facts: ${error.message}`);
+    throw new Error(`Failed to load home_facts: ${error.message}`);
   }
 
   return (data ?? []).map((row) => ({

@@ -3,6 +3,7 @@
 import { HomeFact, Lang, Localized } from "@/lib/types";
 import { EditableText } from "@/components/admin/EditableText";
 import { EditableWrap } from "@/components/admin/EditableWrap";
+import { EditableHomeFacts } from "@/components/admin/EditableHomeFacts";
 import styles from "./HomeSection.module.css";
 import shared from "./shared.module.css";
 
@@ -36,14 +37,7 @@ export function HomeSection({ texts: t, facts: homeFacts, lang, onGoCurrent }: H
         </div>
       </div>
 
-      <div className={styles.facts}>
-        {homeFacts.map((f) => (
-          <div className={styles.factCard} key={f.order}>
-            <div className={shared.eyebrow}>{f.label[lang]}</div>
-            <div className={styles.factVal}>{f.value[lang]}</div>
-          </div>
-        ))}
-      </div>
+      <EditableHomeFacts facts={homeFacts} lang={lang} />
 
       <div className={styles.nowCard}>
         <div className={styles.nowCopy}>

@@ -22,6 +22,94 @@ export async function updateSiteTextInline(key: string, valueDe: string, valueEn
   refresh();
 }
 
+export async function createHomeFactInline(labelDe: string, labelEn: string, valueDe: string, valueEn: string) {
+  const supabase = await createClient();
+
+  const { data: existing, error: fetchError } = await supabase
+    .from("home_facts")
+    .select("order")
+    .order("order", { ascending: false })
+    .limit(1);
+
+  if (fetchError) {
+    throw new Error(`Failed to load home_facts: ${fetchError.message}`);
+  }
+
+  const nextOrder = (existing?.[0]?.order ?? 0) + 1;
+
+  const { error } = await supabase
+    .from("home_facts")
+    .insert({ label_de: labelDe, label_en: labelEn, value_de: valueDe, value_en: valueEn, order: nextOrder });
+
+  if (error) {
+    throw new Error(`Failed to create home fact: ${error.message}`);
+  }
+
+  refresh();
+}
+
+export async function updateHomeFactInline(
+  id: string,
+  labelDe: string,
+  labelEn: string,
+  valueDe: string,
+  valueEn: string
+) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("home_facts")
+    .update({ label_de: labelDe, label_en: labelEn, value_de: valueDe, value_en: valueEn })
+    .eq("id", id);
+
+  if (error) {
+    throw new Error(`Failed to update home fact: ${error.message}`);
+  }
+
+  refresh();
+}
+
+export async function deleteHomeFactInline(id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("home_facts").delete().eq("id", id);
+
+  if (error) {
+    throw new Error(`Failed to delete home fact: ${error.message}`);
+  }
+
+  refresh();
+}
+
+export async function moveHomeFactInline(id: string, direction: "up" | "down") {
+  const supabase = await createClient();
+  const { data: rows, error: fetchError } = await supabase.from("home_facts").select("id, order").order("order");
+
+  if (fetchError) {
+    throw new Error(`Failed to load home_facts: ${fetchError.message}`);
+  }
+
+  const list = rows ?? [];
+  const index = list.findIndex((row) => row.id === id);
+  const swapIndex = direction === "up" ? index - 1 : index + 1;
+
+  if (index === -1 || swapIndex < 0 || swapIndex >= list.length) {
+    return;
+  }
+
+  const current = list[index];
+  const neighbor = list[swapIndex];
+
+  const [{ error: error1 }, { error: error2 }] = await Promise.all([
+    supabase.from("home_facts").update({ order: neighbor.order }).eq("id", current.id),
+    supabase.from("home_facts").update({ order: current.order }).eq("id", neighbor.id)
+  ]);
+
+  if (error1 || error2) {
+    throw new Error(`Failed to reorder home facts: ${(error1 ?? error2)?.message}`);
+  }
+
+  refresh();
+}
+
 export async function createAboutFactInline(labelDe: string, labelEn: string, valueDe: string, valueEn: string) {
   const supabase = await createClient();
 

@@ -13,6 +13,7 @@ export interface TabDef {
 }
 
 export interface HomeFact {
+  id: string;
   order: number;
   label: Localized;
   value: Localized;
