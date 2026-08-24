@@ -8,9 +8,9 @@ Deutschen Börse in Frankfurt am Main, Schwerpunkt Backend & C++.
 Die Seite hat vier Tabs: **Home, About, Projects, Current** (Build-Log). Sie ist durchgehend
 zweisprachig (DE/EN) und unterstützt Light/Dark Mode.
 
-**Zielzustand:** Eine vollwertige Next.js-App mit Datenbank-Backend und einer passwortgeschützten
-Admin-Oberfläche, über die Florian **alle** Inhalte selbst pflegen kann — Texte, Bilder, Icons,
-About-Tags/Stack, Timeline und Build-Log-Meilensteine — ohne Code anzufassen.
+**Zielzustand:** Eine vollwertige Next.js-App mit Supabase als Datenbank-Backend und einer per
+Supabase Auth geschützten Admin-Oberfläche, über die Florian **alle** Inhalte selbst pflegen kann —
+Texte, Bilder, Icons, About-Tags/Stack, Timeline und Build-Log-Meilensteine — ohne Code anzufassen.
 
 ## Ausgangslage (Input für die Umsetzung)
 
@@ -33,11 +33,20 @@ in echtem React/Next.js so nicht gibt.
 - **Framework:** Next.js (App Router), TypeScript
 - **Styling:** CSS-Module oder Tailwind — Design-Tokens (siehe unten) als CSS-Variablen übernehmen,
   nicht als beliebige Zahlenwerte neu erfinden
-- **Datenbank:** Von Claude Code vorschlagen lassen (z. B. Supabase/Postgres) — muss Bilder/Dateien
-  (Uploads) und strukturierte Inhalte gleichermaßen abbilden können
-- **Auth:** Einfacher, aber echter Login fürs Admin-Panel (kein Klartext-Passwort im Code, kein
-  Default-Secret in Produktion — siehe Security-Hinweise unten)
+- **Datenbank:** Supabase (Postgres) — strukturierte Inhalte in Tabellen, siehe Datenmodell unten
+- **Datei-Uploads:** Supabase Storage (eigener Bucket für Projekt-Screenshots u. ä.), nicht separat
+  von der DB verwaltet
+- **Auth:** Supabase Auth (E-Mail/Passwort) fürs Admin-Panel — echte Session, serverseitig via
+  Supabase-Client geprüft (z. B. Middleware/Server Components), kein selbstgebautes Session-Handling
+  und kein Default-Secret in Produktion — siehe Security-Hinweise unten
 - **Deployment:** Vercel
+
+**Supabase-Setup:** Noch kein Projekt angelegt — dieses Dokument beschreibt den Zielzustand.
+Beim Start der Implementierung: Supabase-Projekt anlegen, Verbindungsdaten (`NEXT_PUBLIC_SUPABASE_URL`,
+`NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`) ausschließlich als Umgebungsvariablen
+ablegen (lokal `.env.local`, in Produktion Vercel Environment Variables) und Tabellen/Bucket gemäß
+Datenmodell unten anlegen. Der Service-Role-Key darf nie im Client-Bundle landen, nur in
+Server-seitigem Code (Route Handlers/Server Actions) verwendet werden.
 
 ## Design-System (aus dem Export zu übernehmen)
 
@@ -71,29 +80,47 @@ Alles, was aktuell als hart codiertes Array/Objekt in der Export-Datei steht, so
 | **Site-Texte** | Hero, About-Absätze, Section-Labels | Key, DE-Text, EN-Text |
 | **About – Fakten-Tabelle** | Rolle, Unternehmen, Lehrjahr, Standort, Schwerpunkt | Label (DE/EN), Wert (DE/EN), Reihenfolge |
 | **About – Stack/Tags** | z. B. C++, Python, SQL, Git, Linux, HTML/CSS, JavaScript | Name, Icon (optional), Reihenfolge |
-| **Projekte** | Titel, Kurzbeschreibung, Langtext (2 Absätze), Rolle, Jahr, Tech-Tags, Repo-Link, Screenshot/Bild | alle Felder DE/EN wo zutreffend, Bild-Upload |
+| **Projekte** | Titel, Kurzbeschreibung, Langtext (2 Absätze), Rolle, Jahr, Tech-Tags, Repo-Link, Screenshot/Bild | alle Felder DE/EN wo zutreffend, Bild-Upload (Supabase Storage, Pfad in der Tabelle referenziert) |
 | **Build-Log / Meilensteine** | Titel, Notiz, Datum, erledigt (ja/nein) | DE/EN, Reihenfolge, Fortschritt wird daraus berechnet |
 | **Kontakt** | Formular-Einsendungen | Name, E-Mail, Nachricht, Zeitstempel |
 
 Jeder Text-Inhalt existiert **zweisprachig** (DE/EN) — das Admin-Panel muss beide Sprachen pro
 Eintrag anzeigen und editierbar machen, nicht nur eine.
 
+**Umsetzung als Supabase-Tabellen:** eine Tabelle pro Bereich oben (`site_texts`, `about_facts`,
+`about_stack`, `projects`, `milestones`, `contact_submissions`), Reihenfolge als `order`-Spalte
+(Integer), zweisprachige Felder als getrennte `_de`/`_en`-Spalten (nicht als JSON-Blob, damit sie
+im Supabase Table Editor direkt lesbar/editierbar bleiben). Row Level Security (RLS) aktivieren:
+öffentliches Lesen für alle Content-Tabellen, Schreiben nur für authentifizierte Admin-User;
+`contact_submissions` weder öffentlich lesbar noch direkt vom Client beschreibbar (nur über einen
+Server-seitigen Endpoint, siehe Security-Hinweise).
+
 ## Admin-Panel — Anforderungen
 
-- Geschützt durch echten Login (nicht per Klick-Konvention, sondern serverseitig geprüfte Session/Token)
+- Geschützt durch Supabase Auth (E-Mail/Passwort) — kein Zugriff auf CRUD-Routen ohne gültige
+  Supabase-Session, serverseitig geprüft
 - CRUD für: Projekte, Build-Log-Meilensteine, About-Tags/Stack, About-Tabelle, alle Fließtexte
-- Bild-Upload für Projekt-Screenshots (aktuell nur Platzhalter-Muster im Design)
+- Bild-Upload für Projekt-Screenshots über Supabase Storage (aktuell nur Platzhalter-Muster im Design)
+- Kontaktformular-Einsendungen werden vorerst nur gespeichert (Tabelle `contact_submissions`) und im
+  Admin-Panel einsehbar gemacht — kein E-Mail-Versand in der ersten Version
 - Änderungen sollen sofort (oder nach Republish) auf der Live-Seite sichtbar sein
 - Reihenfolge von Listen (Projekte, Meilensteine, Tags) muss änderbar sein (z. B. Drag-and-drop
   oder ein einfaches Sortierfeld)
 
 ## Security-Hinweise für Claude Code
 
-- Admin-Login niemals mit Default-Passwort/-Secret ausliefern; Secrets ausschließlich über
-  Umgebungsvariablen, nie im Code
+- Admin-Login läuft über Supabase Auth — kein selbstgebautes Passwort-Handling, kein
+  Default-Passwort/-Secret in Produktion; alle Supabase-Keys ausschließlich über Umgebungsvariablen,
+  nie im Code
+- `SUPABASE_SERVICE_ROLE_KEY` nur in Server-seitigem Code (Route Handlers/Server Actions) verwenden,
+  niemals im Client-Bundle oder in `NEXT_PUBLIC_*`-Variablen
+- Row Level Security auf allen Supabase-Tabellen aktivieren (siehe Datenmodell) — nicht auf
+  Anwendungscode allein als Zugriffsschutz verlassen
 - Kontaktformular: Server-seitige Validierung, Rate-Limiting gegen Spam, keine Rohdaten
-  ungefiltert in der DB oder per E-Mail weiterreichen
-- Datei-Uploads (Bilder) auf Dateityp/-größe prüfen, keine ausführbaren Dateien akzeptieren
+  ungefiltert in der DB weiterreichen; Insert nur über einen Server-seitigen Endpoint, nicht direkt
+  vom Client gegen Supabase
+- Datei-Uploads (Bilder) auf Dateityp/-größe prüfen, keine ausführbaren Dateien akzeptieren, bevor
+  sie in Supabase Storage landen
 - `.env`-Dateien nie lesen/committen lassen (in `.claude/settings.json` entsprechend sperren)
 
 ## Konventionen
@@ -107,6 +134,5 @@ Eintrag anzeigen und editierbar machen, nicht nur eine.
 
 ## Offene Punkte (bewusst noch nicht entschieden)
 
-- Genaue Wahl der Datenbank/des Hosting-Anbieters für Bild-Uploads
-- Ob Admin-Login einfaches Passwort oder vollwertiges Auth-System (z. B. NextAuth) sein soll
-- Ob Kontaktformular-Einsendungen nur gespeichert oder zusätzlich per E-Mail weitergeleitet werden sollen
+- Ob Kontaktformular-Einsendungen später (nach der ersten Version) zusätzlich per E-Mail
+  weitergeleitet werden sollen, statt nur gespeichert zu werden
