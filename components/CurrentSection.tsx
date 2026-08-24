@@ -15,7 +15,8 @@ interface CurrentSectionProps {
 export function CurrentSection({ texts: t, milestones, lang }: CurrentSectionProps) {
   const sorted = milestones.slice().sort((a, b) => a.order - b.order);
   const done = sorted.filter((m) => m.done).length;
-  const pct = Math.round((done / sorted.length) * 100);
+  // Guard the empty case — milestones can all be deleted from the admin view.
+  const pct = sorted.length === 0 ? 0 : Math.round((done / sorted.length) * 100);
 
   return (
     <section className={styles.section}>

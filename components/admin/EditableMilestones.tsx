@@ -119,7 +119,9 @@ function MilestoneRow({
         onClick={toggleDone}
         disabled={pending}
         aria-label={milestone.done ? "Mark as not done" : "Mark as done"}
-        style={{ appearance: "none", padding: 0, font: "inherit", cursor: pending ? "default" : "pointer" }}
+        // Only the family is inherited — the `font` shorthand would clobber the
+        // font-size/weight the .dot class sets for the checkmark glyph.
+        style={{ appearance: "none", padding: 0, fontFamily: "inherit", cursor: pending ? "default" : "pointer" }}
       >
         {milestone.done ? "✓" : ""}
       </button>
@@ -173,7 +175,8 @@ function AddMilestoneRow() {
   const [titleEn, setTitleEn] = useState("");
   const [noteDe, setNoteDe] = useState("");
   const [noteEn, setNoteEn] = useState("");
-  const [dateDe, setDateDe] = useState("open");
+  // Defaults match how open milestones are worded in the seed data.
+  const [dateDe, setDateDe] = useState("offen");
   const [dateEn, setDateEn] = useState("open");
   const [pending, startTransition] = useTransition();
   const router = useRouter();
@@ -185,7 +188,7 @@ function AddMilestoneRow() {
       setTitleEn("");
       setNoteDe("");
       setNoteEn("");
-      setDateDe("open");
+      setDateDe("offen");
       setDateEn("open");
       setOpen(false);
       router.refresh();
