@@ -1,10 +1,10 @@
 "use client";
 
-import { Lang, TabId, Theme } from "@/lib/types";
-import { tabs } from "@/lib/data/tabs";
+import { Lang, TabDef, TabId, Theme } from "@/lib/types";
 import styles from "./Header.module.css";
 
 interface HeaderProps {
+  tabs: TabDef[];
   tab: TabId;
   lang: Lang;
   theme: Theme;
@@ -13,7 +13,7 @@ interface HeaderProps {
   onToggleTheme: () => void;
 }
 
-export function Header({ tab, lang, theme, onTabChange, onToggleLang, onToggleTheme }: HeaderProps) {
+export function Header({ tabs, tab, lang, theme, onTabChange, onToggleLang, onToggleTheme }: HeaderProps) {
   return (
     <header className={styles.siteHeader}>
       <div className={styles.headerInner}>

@@ -1,42 +1,31 @@
-"use client";
+import { SiteShell } from "@/components/SiteShell";
+import { getSiteTexts } from "@/lib/data/siteTexts";
+import { getAboutFacts, homeFacts } from "@/lib/data/aboutFacts";
+import { getStack } from "@/lib/data/stack";
+import { getProjects } from "@/lib/data/projects";
+import { getMilestones } from "@/lib/data/milestones";
+import { buildTabs } from "@/lib/data/tabs";
 
-import { BackgroundOrbs } from "@/components/BackgroundOrbs";
-import { Header } from "@/components/Header";
-import { HomeSection } from "@/components/HomeSection";
-import { AboutSection } from "@/components/AboutSection";
-import { ProjectsSection } from "@/components/ProjectsSection";
-import { CurrentSection } from "@/components/CurrentSection";
-import { ProjectModal } from "@/components/ProjectModal";
-import { Footer } from "@/components/Footer";
-import { useSiteState } from "@/lib/useSiteState";
-import styles from "./page.module.css";
+export default async function Page() {
+  const [siteTexts, aboutFacts, stack, projects, milestones] = await Promise.all([
+    getSiteTexts(),
+    getAboutFacts(),
+    getStack(),
+    getProjects(),
+    getMilestones()
+  ]);
 
-export default function Page() {
-  const { tab, goTab, lang, toggleLang, theme, toggleTheme, openId, openModal, closeModal } = useSiteState();
+  const tabs = buildTabs(siteTexts);
 
   return (
-    <div id="app" data-theme={theme}>
-      <BackgroundOrbs />
-
-      <Header
-        tab={tab}
-        lang={lang}
-        theme={theme}
-        onTabChange={goTab}
-        onToggleLang={toggleLang}
-        onToggleTheme={toggleTheme}
-      />
-
-      <main className={styles.main}>
-        {tab === "home" && <HomeSection lang={lang} onGoCurrent={() => goTab("current")} />}
-        {tab === "about" && <AboutSection lang={lang} />}
-        {tab === "projects" && <ProjectsSection lang={lang} onOpenProject={openModal} />}
-        {tab === "current" && <CurrentSection lang={lang} />}
-      </main>
-
-      <ProjectModal lang={lang} openId={openId} onClose={closeModal} />
-
-      <Footer />
-    </div>
+    <SiteShell
+      siteTexts={siteTexts}
+      homeFacts={homeFacts}
+      aboutFacts={aboutFacts}
+      stack={stack}
+      projects={projects}
+      milestones={milestones}
+      tabs={tabs}
+    />
   );
 }

@@ -1,13 +1,16 @@
 "use client";
 
-import { Lang } from "@/lib/types";
-import { siteTexts } from "@/lib/data/siteTexts";
-import { milestones } from "@/lib/data/milestones";
+import { Lang, Localized, Milestone } from "@/lib/types";
 import styles from "./CurrentSection.module.css";
 import shared from "./shared.module.css";
 
-export function CurrentSection({ lang }: { lang: Lang }) {
-  const t = siteTexts;
+interface CurrentSectionProps {
+  texts: Record<string, Localized>;
+  milestones: Milestone[];
+  lang: Lang;
+}
+
+export function CurrentSection({ texts: t, milestones, lang }: CurrentSectionProps) {
   const sorted = milestones.slice().sort((a, b) => a.order - b.order);
   const done = sorted.filter((m) => m.done).length;
   const pct = Math.round((done / sorted.length) * 100);

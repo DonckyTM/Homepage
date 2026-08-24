@@ -1,17 +1,16 @@
 "use client";
 
-import { Lang } from "@/lib/types";
-import { siteTexts } from "@/lib/data/siteTexts";
-import { projects } from "@/lib/data/projects";
+import { Lang, Localized, Project } from "@/lib/types";
 import styles from "./ProjectsSection.module.css";
 
 interface ProjectsSectionProps {
+  texts: Record<string, Localized>;
+  projects: Project[];
   lang: Lang;
   onOpenProject: (id: string) => void;
 }
 
-export function ProjectsSection({ lang, onOpenProject }: ProjectsSectionProps) {
-  const t = siteTexts;
+export function ProjectsSection({ texts: t, projects, lang, onOpenProject }: ProjectsSectionProps) {
   const sorted = projects.slice().sort((a, b) => a.order - b.order);
 
   return (
