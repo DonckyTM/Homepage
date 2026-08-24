@@ -19,12 +19,14 @@ export interface HomeFact {
 }
 
 export interface AboutFact {
+  id: string;
   order: number;
   label: Localized;
   value: Localized;
 }
 
 export interface StackTag {
+  id: string;
   order: number;
   name: string;
   icon?: string;

@@ -10,6 +10,7 @@ import { CurrentSection } from "@/components/CurrentSection";
 import { ProjectModal } from "@/components/ProjectModal";
 import { Footer } from "@/components/Footer";
 import { useSiteState } from "@/lib/useSiteState";
+import { EditModeProvider } from "@/components/admin/EditContext";
 import styles from "@/app/page.module.css";
 
 interface SiteShellProps {
@@ -20,39 +21,51 @@ interface SiteShellProps {
   projects: Project[];
   milestones: Milestone[];
   tabs: TabDef[];
+  editable?: boolean;
 }
 
-export function SiteShell({ siteTexts, homeFacts, aboutFacts, stack, projects, milestones, tabs }: SiteShellProps) {
+export function SiteShell({
+  siteTexts,
+  homeFacts,
+  aboutFacts,
+  stack,
+  projects,
+  milestones,
+  tabs,
+  editable = false
+}: SiteShellProps) {
   const { tab, goTab, lang, toggleLang, theme, toggleTheme, openId, openModal, closeModal } = useSiteState();
 
   return (
-    <div id="app" data-theme={theme}>
-      <BackgroundOrbs />
+    <EditModeProvider enabled={editable}>
+      <div id="app" data-theme={theme}>
+        <BackgroundOrbs />
 
-      <Header
-        tabs={tabs}
-        tab={tab}
-        lang={lang}
-        theme={theme}
-        onTabChange={goTab}
-        onToggleLang={toggleLang}
-        onToggleTheme={toggleTheme}
-      />
+        <Header
+          tabs={tabs}
+          tab={tab}
+          lang={lang}
+          theme={theme}
+          onTabChange={goTab}
+          onToggleLang={toggleLang}
+          onToggleTheme={toggleTheme}
+        />
 
-      <main className={styles.main}>
-        {tab === "home" && (
-          <HomeSection texts={siteTexts} facts={homeFacts} lang={lang} onGoCurrent={() => goTab("current")} />
-        )}
-        {tab === "about" && <AboutSection texts={siteTexts} facts={aboutFacts} stack={stack} lang={lang} />}
-        {tab === "projects" && (
-          <ProjectsSection texts={siteTexts} projects={projects} lang={lang} onOpenProject={openModal} />
-        )}
-        {tab === "current" && <CurrentSection texts={siteTexts} milestones={milestones} lang={lang} />}
-      </main>
+        <main className={styles.main}>
+          {tab === "home" && (
+            <HomeSection texts={siteTexts} facts={homeFacts} lang={lang} onGoCurrent={() => goTab("current")} />
+          )}
+          {tab === "about" && <AboutSection texts={siteTexts} facts={aboutFacts} stack={stack} lang={lang} />}
+          {tab === "projects" && (
+            <ProjectsSection texts={siteTexts} projects={projects} lang={lang} onOpenProject={openModal} />
+          )}
+          {tab === "current" && <CurrentSection texts={siteTexts} milestones={milestones} lang={lang} />}
+        </main>
 
-      <ProjectModal texts={siteTexts} projects={projects} lang={lang} openId={openId} onClose={closeModal} />
+        <ProjectModal texts={siteTexts} projects={projects} lang={lang} openId={openId} onClose={closeModal} />
 
-      <Footer />
-    </div>
+        <Footer />
+      </div>
+    </EditModeProvider>
   );
 }

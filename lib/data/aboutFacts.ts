@@ -7,7 +7,7 @@ export async function getAboutFacts(): Promise<AboutFact[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("about_facts")
-    .select("label_de, label_en, value_de, value_en, order")
+    .select("id, label_de, label_en, value_de, value_en, order")
     .order("order");
 
   if (error) {
@@ -15,6 +15,7 @@ export async function getAboutFacts(): Promise<AboutFact[]> {
   }
 
   return (data ?? []).map((row) => ({
+    id: row.id,
     order: row.order,
     label: { de: row.label_de, en: row.label_en },
     value: { de: row.value_de, en: row.value_en }

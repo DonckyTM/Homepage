@@ -1,6 +1,7 @@
 "use client";
 
 import { Lang, Localized, Milestone } from "@/lib/types";
+import { EditableText } from "@/components/admin/EditableText";
 import styles from "./CurrentSection.module.css";
 import shared from "./shared.module.css";
 
@@ -18,14 +19,14 @@ export function CurrentSection({ texts: t, milestones, lang }: CurrentSectionPro
   return (
     <section className={styles.section}>
       <div className={styles.heading}>
-        <h2>{t.currentTitle[lang]}</h2>
-        <span className={styles.updated}>{t.updated[lang]}</span>
+        <EditableText as="h2" textKey="currentTitle" value={t.currentTitle} lang={lang} />
+        <EditableText as="span" className={styles.updated} textKey="updated" value={t.updated} lang={lang} />
       </div>
-      <p className={styles.intro}>{t.currentIntro[lang]}</p>
+      <EditableText as="p" className={styles.intro} textKey="currentIntro" value={t.currentIntro} lang={lang} multiline />
 
       <div className={styles.progressCard}>
         <div className={styles.progressHead}>
-          <span className={styles.progressLabel}>{t.progressLabel[lang]}</span>
+          <EditableText as="span" className={styles.progressLabel} textKey="progressLabel" value={t.progressLabel} lang={lang} />
           <span className={styles.progressText}>
             {done} / {sorted.length} · {pct}%
           </span>
@@ -49,8 +50,8 @@ export function CurrentSection({ texts: t, milestones, lang }: CurrentSectionPro
       </div>
 
       <div className={styles.learningCard}>
-        <div className={shared.eyebrow}>{t.learningLabel[lang]}</div>
-        <p className={styles.learningBody}>{t.learningBody[lang]}</p>
+        <EditableText as="div" className={shared.eyebrow} textKey="learningLabel" value={t.learningLabel} lang={lang} />
+        <EditableText as="p" className={styles.learningBody} textKey="learningBody" value={t.learningBody} lang={lang} multiline />
       </div>
     </section>
   );
