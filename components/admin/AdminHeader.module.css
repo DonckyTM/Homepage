@@ -1,16 +1,45 @@
 .header {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 16px;
-  max-width: 640px;
+  max-width: 760px;
   margin: 0 auto;
   padding: 20px 24px 0;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 16px;
 }
 
 .brand {
   font-size: 14.5px;
   font-weight: 560;
   letter-spacing: -0.015em;
+}
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.navLink {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-2);
+  padding: 7px 12px;
+  border-radius: 10px;
+  transition: all 160ms ease;
+}
+
+.navLink:hover {
+  color: var(--ink);
+  background: var(--soft);
+}
+
+.navLinkActive {
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--line);
 }
 
 .logout {
