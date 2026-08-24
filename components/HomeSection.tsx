@@ -1,19 +1,17 @@
 "use client";
 
-import { Lang } from "@/lib/types";
-import { siteTexts } from "@/lib/data/siteTexts";
-import { homeFacts } from "@/lib/data/aboutFacts";
+import { HomeFact, Lang, Localized } from "@/lib/types";
 import styles from "./HomeSection.module.css";
 import shared from "./shared.module.css";
 
 interface HomeSectionProps {
+  texts: Record<string, Localized>;
+  facts: HomeFact[];
   lang: Lang;
   onGoCurrent: () => void;
 }
 
-export function HomeSection({ lang, onGoCurrent }: HomeSectionProps) {
-  const t = siteTexts;
-
+export function HomeSection({ texts: t, facts: homeFacts, lang, onGoCurrent }: HomeSectionProps) {
   return (
     <>
       <div className={styles.hero}>

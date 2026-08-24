@@ -1,19 +1,18 @@
 "use client";
 
-import { Lang } from "@/lib/types";
-import { siteTexts } from "@/lib/data/siteTexts";
-import { projects } from "@/lib/data/projects";
+import { Lang, Localized, Project } from "@/lib/types";
 import styles from "./ProjectModal.module.css";
 import shared from "./shared.module.css";
 
 interface ProjectModalProps {
+  texts: Record<string, Localized>;
+  projects: Project[];
   lang: Lang;
   openId: string | null;
   onClose: () => void;
 }
 
-export function ProjectModal({ lang, openId, onClose }: ProjectModalProps) {
-  const t = siteTexts;
+export function ProjectModal({ texts: t, projects, lang, openId, onClose }: ProjectModalProps) {
   const project = projects.find((p) => p.id === openId) ?? null;
 
   return (
@@ -57,9 +56,11 @@ export function ProjectModal({ lang, openId, onClose }: ProjectModalProps) {
             </div>
 
             <div className={styles.actions}>
-              <a href={project.repoUrl} target="_blank" rel="noreferrer" className={styles.btnPrimary}>
-                {t.modalRepo[lang]}
-              </a>
+              {project.repoUrl && (
+                <a href={project.repoUrl} target="_blank" rel="noreferrer" className={styles.btnPrimary}>
+                  {t.modalRepo[lang]}
+                </a>
+              )}
               <button className={styles.btnOutline} onClick={onClose}>
                 {t.modalClose[lang]}
               </button>

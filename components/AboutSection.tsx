@@ -1,15 +1,17 @@
 "use client";
 
-import { Lang } from "@/lib/types";
-import { siteTexts } from "@/lib/data/siteTexts";
-import { aboutFacts } from "@/lib/data/aboutFacts";
-import { stack } from "@/lib/data/stack";
+import { AboutFact, Lang, Localized, StackTag } from "@/lib/types";
 import styles from "./AboutSection.module.css";
 import shared from "./shared.module.css";
 
-export function AboutSection({ lang }: { lang: Lang }) {
-  const t = siteTexts;
+interface AboutSectionProps {
+  texts: Record<string, Localized>;
+  facts: AboutFact[];
+  stack: StackTag[];
+  lang: Lang;
+}
 
+export function AboutSection({ texts: t, facts: aboutFacts, stack, lang }: AboutSectionProps) {
   return (
     <section className={styles.section}>
       <h2>{t.aboutTitle[lang]}</h2>
