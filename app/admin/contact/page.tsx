@@ -1,19 +1,10 @@
-import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
-import styles from "./page.module.css";
+import { ContactInboxView, type Submission } from "@/components/admin/ContactInboxView";
 
 // Uses the service-role client directly (no cookies()/session read), so
 // Next can't infer this needs per-request rendering on its own — force it,
 // otherwise the inbox would be statically prerendered once at build time.
 export const dynamic = "force-dynamic";
-
-interface Submission {
-  id: string;
-  name: string;
-  email: string;
-  message: string;
-  created_at: string;
-}
 
 export default async function AdminContactPage() {
   // contact_submissions has no RLS read policy for authenticated users either
@@ -32,37 +23,5 @@ export default async function AdminContactPage() {
 
   const submissions = (data ?? []) as Submission[];
 
-  return (
-    <div id="app" data-theme="light">
-      <main className={styles.main}>
-        <div className={styles.header}>
-          <h1 className={styles.title}>Contact inbox</h1>
-          <Link href="/admin" className={styles.back}>
-            ← Back to site
-          </Link>
-        </div>
-
-        {submissions.length === 0 && <p className={styles.empty}>No submissions yet.</p>}
-
-        {submissions.length > 0 && (
-          <div className={styles.list}>
-            {submissions.map((submission) => (
-              <article key={submission.id} className={styles.item}>
-                <div className={styles.itemHead}>
-                  <span className={styles.name}>{submission.name}</span>
-                  <time className={styles.date} dateTime={submission.created_at}>
-                    {new Date(submission.created_at).toLocaleString()}
-                  </time>
-                </div>
-                <p className={styles.email}>
-                  <a href={`mailto:${submission.email}`}>{submission.email}</a>
-                </p>
-                <p className={styles.message}>{submission.message}</p>
-              </article>
-            ))}
-          </div>
-        )}
-      </main>
-    </div>
-  );
+  return <ContactInboxView submissions={submissions} />;
 }

@@ -6,7 +6,7 @@
 
 .header {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 24px;
@@ -18,6 +18,29 @@
   letter-spacing: -0.03em;
   margin: 0;
 }
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.themeBtn {
+  appearance: none;
+  cursor: pointer;
+  border-radius: 11px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--ink-2);
+  font-size: 14px;
+  height: 32px;
+  width: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 160ms ease;
+}
+.themeBtn:hover { border-color: var(--ink-3); color: var(--ink); }
 
 .back {
   font-size: 13px;
