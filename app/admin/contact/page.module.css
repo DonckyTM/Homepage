@@ -81,6 +81,12 @@
   letter-spacing: -0.01em;
 }
 
+.itemHeadRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .date {
   font-family: "IBM Plex Mono", monospace;
   font-size: 11.5px;
@@ -88,6 +94,67 @@
   color: var(--ink-3);
   white-space: nowrap;
 }
+
+.deleteBtn {
+  appearance: none;
+  cursor: pointer;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--ink-3);
+  border-radius: 7px;
+  font-size: 11px;
+  line-height: 1;
+  transition: all 160ms ease;
+}
+.deleteBtn:hover:not(:disabled) { border-color: #c0392b; color: #c0392b; }
+.deleteBtn:disabled { opacity: 0.4; cursor: default; }
+
+.confirmRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.confirmText {
+  font-size: 12.5px;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+
+.confirmCancel,
+.confirmDelete {
+  appearance: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 560;
+  border-radius: 8px;
+  padding: 5px 11px;
+  white-space: nowrap;
+  transition: opacity 160ms ease, border-color 160ms ease;
+}
+
+.confirmCancel {
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink-2);
+}
+.confirmCancel:hover:not(:disabled) { border-color: var(--ink-3); color: var(--ink); }
+
+.confirmDelete {
+  border: 0;
+  background: #c0392b;
+  color: #fff;
+}
+.confirmDelete:hover:not(:disabled) { opacity: 0.88; }
+
+.confirmCancel:disabled,
+.confirmDelete:disabled { opacity: 0.5; cursor: default; }
 
 .email {
   margin-top: 2px;

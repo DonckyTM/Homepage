@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Theme } from "@/lib/types";
+import { deleteContactSubmissionInline } from "@/app/admin/contact/actions";
 import styles from "@/app/admin/contact/page.module.css";
 
 const STORAGE_KEY = "fd-home";
@@ -25,6 +27,11 @@ interface Persisted {
 // the page instead of drifting into its own separate preference.
 export function ContactInboxView({ submissions }: { submissions: Submission[] }) {
   const [theme, setTheme] = useState<Theme>("light");
+  const [items, setItems] = useState(submissions);
+
+  useEffect(() => {
+    setItems(submissions);
+  }, [submissions]);
 
   useEffect(() => {
     try {
@@ -66,27 +73,72 @@ export function ContactInboxView({ submissions }: { submissions: Submission[] })
           </div>
         </div>
 
-        {submissions.length === 0 && <p className={styles.empty}>No submissions yet.</p>}
+        {items.length === 0 && <p className={styles.empty}>No submissions yet.</p>}
 
-        {submissions.length > 0 && (
+        {items.length > 0 && (
           <div className={styles.list}>
-            {submissions.map((submission) => (
-              <article key={submission.id} className={styles.item}>
-                <div className={styles.itemHead}>
-                  <span className={styles.name}>{submission.name}</span>
-                  <time className={styles.date} dateTime={submission.created_at}>
-                    {new Date(submission.created_at).toLocaleString()}
-                  </time>
-                </div>
-                <p className={styles.email}>
-                  <a href={`mailto:${submission.email}`}>{submission.email}</a>
-                </p>
-                <p className={styles.message}>{submission.message}</p>
-              </article>
+            {items.map((submission) => (
+              <SubmissionItem
+                key={submission.id}
+                submission={submission}
+                onDeleted={(id) => setItems((prev) => prev.filter((item) => item.id !== id))}
+              />
             ))}
           </div>
         )}
       </main>
     </div>
+  );
+}
+
+function SubmissionItem({ submission, onDeleted }: { submission: Submission; onDeleted: (id: string) => void }) {
+  const [confirming, setConfirming] = useState(false);
+  const [pending, startTransition] = useTransition();
+  const router = useRouter();
+
+  function remove() {
+    startTransition(async () => {
+      await deleteContactSubmissionInline(submission.id);
+      onDeleted(submission.id);
+      router.refresh();
+    });
+  }
+
+  return (
+    <article className={styles.item}>
+      <div className={styles.itemHead}>
+        <span className={styles.name}>{submission.name}</span>
+        {confirming ? (
+          <span className={styles.confirmRow}>
+            <span className={styles.confirmText}>Delete this message?</span>
+            <button type="button" className={styles.confirmCancel} onClick={() => setConfirming(false)} disabled={pending}>
+              Cancel
+            </button>
+            <button type="button" className={styles.confirmDelete} onClick={remove} disabled={pending}>
+              {pending ? "Deleting…" : "Delete"}
+            </button>
+          </span>
+        ) : (
+          <span className={styles.itemHeadRight}>
+            <time className={styles.date} dateTime={submission.created_at}>
+              {new Date(submission.created_at).toLocaleString()}
+            </time>
+            <button
+              type="button"
+              className={styles.deleteBtn}
+              onClick={() => setConfirming(true)}
+              aria-label={`Delete message from ${submission.name}`}
+              title="Delete"
+            >
+              ✕
+            </button>
+          </span>
+        )}
+      </div>
+      <p className={styles.email}>
+        <a href={`mailto:${submission.email}`}>{submission.email}</a>
+      </p>
+      <p className={styles.message}>{submission.message}</p>
+    </article>
   );
 }
