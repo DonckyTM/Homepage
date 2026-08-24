@@ -13,18 +13,21 @@ export interface TabDef {
 }
 
 export interface HomeFact {
+  id: string;
   order: number;
   label: Localized;
   value: Localized;
 }
 
 export interface AboutFact {
+  id: string;
   order: number;
   label: Localized;
   value: Localized;
 }
 
 export interface StackTag {
+  id: string;
   order: number;
   name: string;
   icon?: string;
@@ -46,6 +49,7 @@ export interface Project {
 }
 
 export interface Milestone {
+  id: string;
   order: number;
   title: Localized;
   note: Localized;

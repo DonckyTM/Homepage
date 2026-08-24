@@ -1,6 +1,9 @@
 "use client";
 
 import { AboutFact, Lang, Localized, StackTag } from "@/lib/types";
+import { EditableText } from "@/components/admin/EditableText";
+import { EditableAboutFacts } from "@/components/admin/EditableAboutFacts";
+import { EditableStackTags } from "@/components/admin/EditableStackTags";
 import styles from "./AboutSection.module.css";
 import shared from "./shared.module.css";
 
@@ -14,38 +17,25 @@ interface AboutSectionProps {
 export function AboutSection({ texts: t, facts: aboutFacts, stack, lang }: AboutSectionProps) {
   return (
     <section className={styles.section}>
-      <h2>{t.aboutTitle[lang]}</h2>
+      <EditableText as="h2" textKey="aboutTitle" value={t.aboutTitle} lang={lang} />
       <div className={styles.aboutGrid}>
         <div className={styles.aboutCopy}>
-          <p>{t.aboutP1[lang]}</p>
-          <p className={styles.muted}>{t.aboutP2[lang]}</p>
-          <p className={styles.muted}>{t.aboutP3[lang]}</p>
+          <EditableText as="p" textKey="aboutP1" value={t.aboutP1} lang={lang} multiline />
+          <EditableText as="p" className={styles.muted} textKey="aboutP2" value={t.aboutP2} lang={lang} multiline />
+          <EditableText as="p" className={styles.muted} textKey="aboutP3" value={t.aboutP3} lang={lang} multiline />
         </div>
-        <div className={styles.aboutRows}>
-          {aboutFacts
-            .slice()
-            .sort((a, b) => a.order - b.order)
-            .map((row) => (
-              <div className={styles.aboutRow} key={row.order}>
-                <span className={styles.aboutRowK}>{row.label[lang]}</span>
-                <span className={styles.aboutRowV}>{row.value[lang]}</span>
-              </div>
-            ))}
-        </div>
+        <EditableAboutFacts facts={aboutFacts} lang={lang} />
       </div>
 
       <div className={styles.stackBlock}>
-        <div className={`${shared.eyebrow} ${styles.stackLabel}`}>{t.stackLabel[lang]}</div>
-        <div className={styles.stackTags}>
-          {stack
-            .slice()
-            .sort((a, b) => a.order - b.order)
-            .map((s) => (
-              <span className={styles.stackTag} key={s.order}>
-                {s.name}
-              </span>
-            ))}
-        </div>
+        <EditableText
+          as="div"
+          className={`${shared.eyebrow} ${styles.stackLabel}`}
+          textKey="stackLabel"
+          value={t.stackLabel}
+          lang={lang}
+        />
+        <EditableStackTags tags={stack} />
       </div>
     </section>
   );

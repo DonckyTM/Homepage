@@ -15,6 +15,11 @@
   display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; letter-spacing: -0.02em;
 }
 .brandName { font-size: 14.5px; font-weight: 560; letter-spacing: -0.015em; }
+.adminBadge {
+  font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; font-weight: 500; letter-spacing: 0.05em;
+  text-transform: uppercase; color: var(--accent); background: var(--accent-soft);
+  border-radius: 999px; padding: 3px 9px;
+}
 
 .tabs {
   margin-left: auto; display: flex; align-items: center; gap: 2px;

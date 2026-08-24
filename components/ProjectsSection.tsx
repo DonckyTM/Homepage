@@ -1,6 +1,7 @@
 "use client";
 
 import { Lang, Localized, Project } from "@/lib/types";
+import { EditableText } from "@/components/admin/EditableText";
 import styles from "./ProjectsSection.module.css";
 
 interface ProjectsSectionProps {
@@ -15,8 +16,8 @@ export function ProjectsSection({ texts: t, projects, lang, onOpenProject }: Pro
 
   return (
     <section className={styles.section}>
-      <h2>{t.projectsTitle[lang]}</h2>
-      <p className={styles.intro}>{t.projectsIntro[lang]}</p>
+      <EditableText as="h2" textKey="projectsTitle" value={t.projectsTitle} lang={lang} />
+      <EditableText as="p" className={styles.intro} textKey="projectsIntro" value={t.projectsIntro} lang={lang} multiline />
 
       <div className={styles.grid}>
         {sorted.map((p, i) => (
@@ -36,8 +37,8 @@ export function ProjectsSection({ texts: t, projects, lang, onOpenProject }: Pro
           </button>
         ))}
         <div className={styles.emptyCard}>
-          <div className={styles.emptyTitle}>{t.emptyTitle[lang]}</div>
-          <p className={styles.emptyBody}>{t.emptyBody[lang]}</p>
+          <EditableText as="div" className={styles.emptyTitle} textKey="emptyTitle" value={t.emptyTitle} lang={lang} />
+          <EditableText as="p" className={styles.emptyBody} textKey="emptyBody" value={t.emptyBody} lang={lang} multiline />
         </div>
       </div>
     </section>

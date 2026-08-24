@@ -1,6 +1,8 @@
 "use client";
 
 import { Lang, Localized, Project } from "@/lib/types";
+import { EditableText } from "@/components/admin/EditableText";
+import { EditableWrap } from "@/components/admin/EditableWrap";
 import styles from "./ProjectModal.module.css";
 import shared from "./shared.module.css";
 
@@ -34,11 +36,11 @@ export function ProjectModal({ texts: t, projects, lang, openId, onClose }: Proj
 
             <div className={styles.meta}>
               <div className={styles.metaCell}>
-                <div className={shared.eyebrow}>{t.modalYearLabel[lang]}</div>
+                <EditableText as="div" className={shared.eyebrow} textKey="modalYearLabel" value={t.modalYearLabel} lang={lang} />
                 <div className={styles.metaVal}>{project.year[lang]}</div>
               </div>
               <div className={`${styles.metaCell} ${styles.metaWide}`}>
-                <div className={shared.eyebrow}>{t.modalRoleLabel[lang]}</div>
+                <EditableText as="div" className={shared.eyebrow} textKey="modalRoleLabel" value={t.modalRoleLabel} lang={lang} />
                 <div className={styles.metaVal}>{project.role[lang]}</div>
               </div>
             </div>
@@ -46,7 +48,13 @@ export function ProjectModal({ texts: t, projects, lang, openId, onClose }: Proj
             <p>{project.long1[lang]}</p>
             <p className={styles.muted}>{project.long2[lang]}</p>
 
-            <div className={`${shared.eyebrow} ${styles.techLabel}`}>{t.modalTechLabel[lang]}</div>
+            <EditableText
+              as="div"
+              className={`${shared.eyebrow} ${styles.techLabel}`}
+              textKey="modalTechLabel"
+              value={t.modalTechLabel}
+              lang={lang}
+            />
             <div className={styles.tech}>
               {project.techTags.map((x) => (
                 <span className={styles.techTag} key={x}>
@@ -57,13 +65,17 @@ export function ProjectModal({ texts: t, projects, lang, openId, onClose }: Proj
 
             <div className={styles.actions}>
               {project.repoUrl && (
-                <a href={project.repoUrl} target="_blank" rel="noreferrer" className={styles.btnPrimary}>
-                  {t.modalRepo[lang]}
-                </a>
+                <EditableWrap textKey="modalRepo" value={t.modalRepo}>
+                  <a href={project.repoUrl} target="_blank" rel="noreferrer" className={styles.btnPrimary}>
+                    {t.modalRepo[lang]}
+                  </a>
+                </EditableWrap>
               )}
-              <button className={styles.btnOutline} onClick={onClose}>
-                {t.modalClose[lang]}
-              </button>
+              <EditableWrap textKey="modalClose" value={t.modalClose}>
+                <button className={styles.btnOutline} onClick={onClose}>
+                  {t.modalClose[lang]}
+                </button>
+              </EditableWrap>
             </div>
           </div>
         </div>

@@ -1,6 +1,8 @@
 "use client";
 
 import { Lang, Localized, Milestone } from "@/lib/types";
+import { EditableText } from "@/components/admin/EditableText";
+import { EditableMilestones } from "@/components/admin/EditableMilestones";
 import styles from "./CurrentSection.module.css";
 import shared from "./shared.module.css";
 
@@ -13,19 +15,20 @@ interface CurrentSectionProps {
 export function CurrentSection({ texts: t, milestones, lang }: CurrentSectionProps) {
   const sorted = milestones.slice().sort((a, b) => a.order - b.order);
   const done = sorted.filter((m) => m.done).length;
-  const pct = Math.round((done / sorted.length) * 100);
+  // Guard the empty case — milestones can all be deleted from the admin view.
+  const pct = sorted.length === 0 ? 0 : Math.round((done / sorted.length) * 100);
 
   return (
     <section className={styles.section}>
       <div className={styles.heading}>
-        <h2>{t.currentTitle[lang]}</h2>
-        <span className={styles.updated}>{t.updated[lang]}</span>
+        <EditableText as="h2" textKey="currentTitle" value={t.currentTitle} lang={lang} />
+        <EditableText as="span" className={styles.updated} textKey="updated" value={t.updated} lang={lang} />
       </div>
-      <p className={styles.intro}>{t.currentIntro[lang]}</p>
+      <EditableText as="p" className={styles.intro} textKey="currentIntro" value={t.currentIntro} lang={lang} multiline />
 
       <div className={styles.progressCard}>
         <div className={styles.progressHead}>
-          <span className={styles.progressLabel}>{t.progressLabel[lang]}</span>
+          <EditableText as="span" className={styles.progressLabel} textKey="progressLabel" value={t.progressLabel} lang={lang} />
           <span className={styles.progressText}>
             {done} / {sorted.length} · {pct}%
           </span>
@@ -34,23 +37,12 @@ export function CurrentSection({ texts: t, milestones, lang }: CurrentSectionPro
           <div className={styles.progressFill} style={{ width: `${pct}%` }} />
         </div>
 
-        <div className={styles.milestones}>
-          {sorted.map((m) => (
-            <div className={`${styles.milestone} ${m.done ? styles.milestoneDone : ""}`} key={m.order}>
-              <div className={styles.dot}>{m.done ? "✓" : ""}</div>
-              <div className={styles.milestoneBody}>
-                <div className={styles.milestoneTitle}>{m.title[lang]}</div>
-                <div className={styles.note}>{m.note[lang]}</div>
-              </div>
-              <div className={styles.date}>{m.date[lang]}</div>
-            </div>
-          ))}
-        </div>
+        <EditableMilestones milestones={milestones} lang={lang} />
       </div>
 
       <div className={styles.learningCard}>
-        <div className={shared.eyebrow}>{t.learningLabel[lang]}</div>
-        <p className={styles.learningBody}>{t.learningBody[lang]}</p>
+        <EditableText as="div" className={shared.eyebrow} textKey="learningLabel" value={t.learningLabel} lang={lang} />
+        <EditableText as="p" className={styles.learningBody} textKey="learningBody" value={t.learningBody} lang={lang} multiline />
       </div>
     </section>
   );
