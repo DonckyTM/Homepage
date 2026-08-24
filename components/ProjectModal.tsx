@@ -1,10 +1,20 @@
 "use client";
 
+import { useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Lang, Localized, Project } from "@/lib/types";
 import { EditableText } from "@/components/admin/EditableText";
 import { EditableWrap } from "@/components/admin/EditableWrap";
+import { EditableProjectField } from "@/components/admin/EditableProjectField";
+import { EditableTechTags } from "@/components/admin/EditableTechTags";
+import { EditableRepoUrl } from "@/components/admin/EditableRepoUrl";
+import { EditableScreenshot } from "@/components/admin/EditableScreenshot";
+import { useEditMode } from "@/components/admin/EditContext";
+import { updateProjectInline } from "@/app/admin/actions";
+import { getScreenshotUrl } from "@/lib/supabase/storage";
 import styles from "./ProjectModal.module.css";
 import shared from "./shared.module.css";
+import adminStyles from "@/components/admin/Editable.module.css";
 
 interface ProjectModalProps {
   texts: Record<string, Localized>;
@@ -15,7 +25,9 @@ interface ProjectModalProps {
 }
 
 export function ProjectModal({ texts: t, projects, lang, openId, onClose }: ProjectModalProps) {
+  const editMode = useEditMode();
   const project = projects.find((p) => p.id === openId) ?? null;
+  const shotUrl = project ? getScreenshotUrl(project.screenshotPath) : null;
 
   return (
     <div
@@ -25,28 +37,62 @@ export function ProjectModal({ texts: t, projects, lang, openId, onClose }: Proj
       {project && (
         <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
           <div className={styles.shot}>
-            <span className={styles.shotTag}>{project.screenshotLabel[lang]}</span>
+            {shotUrl && <img src={shotUrl} alt={project.title[lang]} className={styles.shotImg} />}
+            {!shotUrl && <span className={styles.shotTag}>{project.screenshotLabel[lang]}</span>}
+            {editMode && <EditableScreenshot projectId={project.id} />}
             <button className={styles.closeBtn} aria-label="Close" onClick={onClose}>
               ✕
             </button>
           </div>
 
           <div className={styles.body}>
-            <h3>{project.title[lang]}</h3>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+              <h3 style={{ margin: 0 }}>{project.title[lang]}</h3>
+              {editMode && <InProgressToggle projectId={project.id} inProgress={project.inProgress} />}
+            </div>
 
             <div className={styles.meta}>
               <div className={styles.metaCell}>
                 <EditableText as="div" className={shared.eyebrow} textKey="modalYearLabel" value={t.modalYearLabel} lang={lang} />
-                <div className={styles.metaVal}>{project.year[lang]}</div>
+                <EditableProjectField
+                  as="div"
+                  className={styles.metaVal}
+                  value={project.year}
+                  lang={lang}
+                  label="Year"
+                  onSave={(de, en) => updateProjectInline(project.id, { yearDe: de, yearEn: en })}
+                />
               </div>
               <div className={`${styles.metaCell} ${styles.metaWide}`}>
                 <EditableText as="div" className={shared.eyebrow} textKey="modalRoleLabel" value={t.modalRoleLabel} lang={lang} />
-                <div className={styles.metaVal}>{project.role[lang]}</div>
+                <EditableProjectField
+                  as="div"
+                  className={styles.metaVal}
+                  value={project.role}
+                  lang={lang}
+                  label="Role"
+                  onSave={(de, en) => updateProjectInline(project.id, { roleDe: de, roleEn: en })}
+                />
               </div>
             </div>
 
-            <p>{project.long1[lang]}</p>
-            <p className={styles.muted}>{project.long2[lang]}</p>
+            <EditableProjectField
+              as="p"
+              value={project.long1}
+              lang={lang}
+              label="Text 1"
+              multiline
+              onSave={(de, en) => updateProjectInline(project.id, { long1De: de, long1En: en })}
+            />
+            <EditableProjectField
+              as="p"
+              className={styles.muted}
+              value={project.long2}
+              lang={lang}
+              label="Text 2"
+              multiline
+              onSave={(de, en) => updateProjectInline(project.id, { long2De: de, long2En: en })}
+            />
 
             <EditableText
               as="div"
@@ -55,22 +101,16 @@ export function ProjectModal({ texts: t, projects, lang, openId, onClose }: Proj
               value={t.modalTechLabel}
               lang={lang}
             />
-            <div className={styles.tech}>
-              {project.techTags.map((x) => (
-                <span className={styles.techTag} key={x}>
-                  {x}
-                </span>
-              ))}
-            </div>
+            <EditableTechTags projectId={project.id} tags={project.techTags} />
 
             <div className={styles.actions}>
-              {project.repoUrl && (
+              <EditableRepoUrl projectId={project.id} repoUrl={project.repoUrl}>
                 <EditableWrap textKey="modalRepo" value={t.modalRepo}>
                   <a href={project.repoUrl} target="_blank" rel="noreferrer" className={styles.btnPrimary}>
                     {t.modalRepo[lang]}
                   </a>
                 </EditableWrap>
-              )}
+              </EditableRepoUrl>
               <EditableWrap textKey="modalClose" value={t.modalClose}>
                 <button className={styles.btnOutline} onClick={onClose}>
                   {t.modalClose[lang]}
@@ -81,5 +121,23 @@ export function ProjectModal({ texts: t, projects, lang, openId, onClose }: Proj
         </div>
       )}
     </div>
+  );
+}
+
+function InProgressToggle({ projectId, inProgress }: { projectId: string; inProgress: boolean }) {
+  const [pending, startTransition] = useTransition();
+  const router = useRouter();
+
+  function toggle() {
+    startTransition(async () => {
+      await updateProjectInline(projectId, { inProgress: !inProgress });
+      router.refresh();
+    });
+  }
+
+  return (
+    <button type="button" onClick={toggle} disabled={pending} className={adminStyles.addTrigger}>
+      {inProgress ? "✓ In progress" : "+ Mark in progress"}
+    </button>
   );
 }

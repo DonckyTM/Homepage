@@ -8,7 +8,7 @@ export async function getProjects(): Promise<Project[]> {
   const { data, error } = await supabase
     .from("projects")
     .select(
-      "id, title_de, title_en, blurb_de, blurb_en, long1_de, long1_en, long2_de, long2_en, role_de, role_en, year_de, year_en, tech_tags, repo_url, in_progress, order"
+      "id, title_de, title_en, blurb_de, blurb_en, long1_de, long1_en, long2_de, long2_en, role_de, role_en, year_de, year_en, tech_tags, repo_url, screenshot_path, in_progress, order"
     )
     .order("order");
 
@@ -27,8 +27,8 @@ export async function getProjects(): Promise<Project[]> {
     year: { de: row.year_de, en: row.year_en },
     techTags: row.tech_tags ?? [],
     repoUrl: row.repo_url ?? "",
-    // `screenshot_path` (Supabase Storage) isn't wired up to a real image yet — the
-    // seeded label is always "screenshot" for both languages, matching the old placeholder.
+    screenshotPath: row.screenshot_path ?? null,
+    // Placeholder shown until a real screenshot is uploaded (see screenshotPath).
     screenshotLabel: { en: "screenshot", de: "screenshot" },
     inProgress: row.in_progress
   }));

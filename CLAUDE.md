@@ -28,13 +28,13 @@ eine andere Seite, keine Tabellen-Ansicht. Details siehe „Admin-Panel — Anfo
   (E-Mail/Passwort). Kein Selbstregistrierungs-Flow — Accounts werden manuell im Supabase-Dashboard
   angelegt.
 - **Admin-Bearbeitung:** als Inline-Editing auf der Live-Seite umgesetzt für Site-Texte, About-Fakten,
-  About-Stack, Home-Fakten-Karten (Rolle/Standort/Schwerpunkt) und Build-Log-Meilensteine — inklusive
-  Hinzufügen/Löschen/Umsortieren bei den Listen und Ein-Klick-Toggle für den Erledigt-Status bei
-  Meilensteinen.
-- **Noch offen:** Projekte (CRUD + Bild-Upload über Supabase Storage) und das Kontaktformular
-  (Server-seitiger Insert-Endpoint + Admin-Ansicht der Einsendungen) sind noch nicht umgesetzt — siehe
-  „Offene Punkte". Beide sollten dem gleichen Inline-Editing-Muster folgen statt einer separaten
-  Verwaltungsseite.
+  About-Stack, Home-Fakten-Karten (Rolle/Standort/Schwerpunkt), Build-Log-Meilensteine und Projekte —
+  inklusive Hinzufügen/Löschen/Umsortieren bei den Listen, Ein-Klick-Toggle für den Erledigt-Status bei
+  Meilensteinen bzw. den In-Arbeit-Status bei Projekten, und Screenshot-Upload für Projekte über einen
+  öffentlich lesbaren Supabase-Storage-Bucket (`project-screenshots`).
+- **Noch offen:** Das Kontaktformular (Server-seitiger Insert-Endpoint + Admin-Ansicht der
+  Einsendungen) ist noch nicht umgesetzt — siehe „Offene Punkte". Sollte dem gleichen
+  Inline-Editing-Muster folgen statt einer separaten Verwaltungsseite.
 
 ## Ausgangslage (Input für die Umsetzung)
 
@@ -168,12 +168,18 @@ Inhaltsfläche baut, sollte diesem Muster folgen statt eine neue Verwaltungsseit
   - `EditableText` — ein einzelnes Textfeld (DE/EN) direkt an seiner Stelle im Layout
   - `EditableWrap` — für Text innerhalb eines bestehenden Links/Buttons (z. B. CTA-Beschriftungen),
     wo das Stift-Icon als Geschwister-Element statt verschachtelt gerendert werden muss
-  - `EditableAboutFacts`, `EditableStackTags`, `EditableHomeFacts`, `EditableMilestones` — Listen
-    mit Sortieren/Löschen/Hinzufügen im jeweiligen Layout der öffentlichen Sektion
+  - `EditableAboutFacts`, `EditableStackTags`, `EditableHomeFacts`, `EditableMilestones`,
+    `EditableProjectCard`/`AddProjectCard` — Listen mit Sortieren/Löschen/Hinzufügen im jeweiligen
+    Layout der öffentlichen Sektion
+  - `EditableProjectField`, `EditableTechTags`, `EditableRepoUrl`, `EditableScreenshot` — die
+    Detailfelder eines Projekts im `ProjectModal` (Rolle, Jahr, Langtexte, Tech-Tags, Repo-Link,
+    Screenshot-Upload)
   - `EditPopover` — das gemeinsame Popover-Layout (Felder + Speichern/Abbrechen), von allen oben
     genannten Komponenten wiederverwendet
-- Projekte (inkl. Bild-Upload) und das Kontaktformular-Postfach sind noch nicht nach diesem Muster
-  umgesetzt.
+- Projekt-Screenshots liegen im öffentlich lesbaren Storage-Bucket `project-screenshots`
+  (`supabase/migrations/20260824130000_project_screenshots_storage.sql`); Upload läuft über eine
+  Server Action, die Dateityp (PNG/JPEG/WebP) und Größe (max. 5MB) vor dem Upload prüft.
+- Das Kontaktformular-Postfach ist noch nicht nach diesem Muster umgesetzt.
 
 ## Security-Hinweise für Claude Code
 
@@ -207,10 +213,6 @@ Inhaltsfläche baut, sollte diesem Muster folgen statt eine neue Verwaltungsseit
 
 ## Noch nicht umgesetzt
 
-- **Projekte:** Tabelle `projects` existiert und ist befüllt, aber es gibt noch kein Admin-UI dafür
-  (weder Bearbeiten von Titel/Text/Tech-Tags noch Bild-Upload über Supabase Storage). Sollte dem
-  Inline-Editing-Muster oben folgen — vermutlich mit dem Projekt-Modal/den Projekt-Karten als
-  Editier-Oberfläche statt einer separaten Liste.
 - **Kontaktformular:** Tabelle `contact_submissions` existiert mit RLS (kein Client-Zugriff), aber
   weder der Server-seitige Insert-Endpoint für das öffentliche Formular noch eine Admin-Ansicht der
   Einsendungen sind gebaut.
