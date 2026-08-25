@@ -543,6 +543,56 @@ export async function toggleMilestoneDoneInline(id: string, done: boolean) {
   refresh();
 }
 
+const BRAND_ASSETS_BUCKET = "brand-assets";
+const ALLOWED_BRAND_LOGO_TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
+const MAX_BRAND_LOGO_BYTES = 2 * 1024 * 1024;
+
+export async function uploadBrandLogoInline(formData: FormData) {
+  const file = formData.get("file");
+  if (!(file instanceof File)) {
+    throw new Error("No file provided.");
+  }
+  if (!ALLOWED_BRAND_LOGO_TYPES.has(file.type)) {
+    throw new Error("Only PNG, JPEG, or WebP images are allowed.");
+  }
+  if (file.size > MAX_BRAND_LOGO_BYTES) {
+    throw new Error("Image must be 2MB or smaller.");
+  }
+
+  const supabase = await createClient();
+
+  const { data: existing } = await supabase
+    .from("site_settings")
+    .select("value")
+    .eq("key", "brand_logo_path")
+    .maybeSingle();
+
+  const extension = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
+  const path = `logo-${Date.now()}.${extension}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from(BRAND_ASSETS_BUCKET)
+    .upload(path, file, { contentType: file.type, upsert: true });
+
+  if (uploadError) {
+    throw new Error(`Failed to upload logo: ${uploadError.message}`);
+  }
+
+  const { error } = await supabase
+    .from("site_settings")
+    .upsert({ key: "brand_logo_path", value: path });
+
+  if (error) {
+    throw new Error(`Failed to save logo: ${error.message}`);
+  }
+
+  if (existing?.value && existing.value !== path) {
+    await supabase.storage.from(BRAND_ASSETS_BUCKET).remove([existing.value]);
+  }
+
+  refresh();
+}
+
 export async function deleteMilestoneInline(id: string) {
   const supabase = await createClient();
   const { error } = await supabase.from("milestones").delete().eq("id", id);

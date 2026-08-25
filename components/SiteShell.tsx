@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { AboutFact, HomeFact, Localized, Milestone, Project, StackTag, TabDef } from "@/lib/types";
 import { BackgroundOrbs } from "@/components/BackgroundOrbs";
 import { Header } from "@/components/Header";
@@ -22,6 +23,7 @@ interface SiteShellProps {
   projects: Project[];
   milestones: Milestone[];
   tabs: TabDef[];
+  brandLogoUrl: string | null;
   editable?: boolean;
 }
 
@@ -33,6 +35,7 @@ export function SiteShell({
   projects,
   milestones,
   tabs,
+  brandLogoUrl,
   editable = false
 }: SiteShellProps) {
   const {
@@ -50,6 +53,10 @@ export function SiteShell({
     closeContact
   } = useSiteState();
 
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+  }, [theme]);
+
   return (
     <EditModeProvider enabled={editable}>
       <div id="app" data-theme={theme}>
@@ -60,6 +67,8 @@ export function SiteShell({
           tab={tab}
           lang={lang}
           theme={theme}
+          brandName={siteTexts.brandName}
+          brandLogoUrl={brandLogoUrl}
           onTabChange={goTab}
           onToggleLang={toggleLang}
           onToggleTheme={toggleTheme}

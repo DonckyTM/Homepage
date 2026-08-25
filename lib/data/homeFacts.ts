@@ -1,10 +1,9 @@
 import { HomeFact } from "@/lib/types";
-import { createClient } from "@/lib/supabase/server";
+import { SupabaseServerClient } from "@/lib/supabase/server";
 
 // Home tab fact cards: role, based in, focus. Loaded from the `home_facts`
 // table, ordered by "order".
-export async function getHomeFacts(): Promise<HomeFact[]> {
-  const supabase = await createClient();
+export async function getHomeFacts(supabase: SupabaseServerClient): Promise<HomeFact[]> {
   const { data, error } = await supabase
     .from("home_facts")
     .select("id, label_de, label_en, value_de, value_en, order")

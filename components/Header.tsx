@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Lang, TabDef, TabId, Theme } from "@/lib/types";
+import { Lang, Localized, TabDef, TabId, Theme } from "@/lib/types";
 import { useEditMode } from "@/components/admin/EditContext";
 import { EditableWrap } from "@/components/admin/EditableWrap";
+import { EditableText } from "@/components/admin/EditableText";
+import { EditableBrandLogo } from "@/components/admin/EditableBrandLogo";
 import { createClient } from "@/lib/supabase/client";
 import styles from "./Header.module.css";
 
@@ -13,12 +15,24 @@ interface HeaderProps {
   tab: TabId;
   lang: Lang;
   theme: Theme;
+  brandName: Localized;
+  brandLogoUrl: string | null;
   onTabChange: (id: TabId) => void;
   onToggleLang: () => void;
   onToggleTheme: () => void;
 }
 
-export function Header({ tabs, tab, lang, theme, onTabChange, onToggleLang, onToggleTheme }: HeaderProps) {
+export function Header({
+  tabs,
+  tab,
+  lang,
+  theme,
+  brandName,
+  brandLogoUrl,
+  onTabChange,
+  onToggleLang,
+  onToggleTheme
+}: HeaderProps) {
   const editMode = useEditMode();
   const router = useRouter();
 
@@ -33,8 +47,16 @@ export function Header({ tabs, tab, lang, theme, onTabChange, onToggleLang, onTo
     <header className={styles.siteHeader}>
       <div className={styles.headerInner}>
         <div className={styles.brand}>
-          <div className={styles.brandMark}>FD</div>
-          <span className={styles.brandName}>Florian Dehm</span>
+          <div className={styles.brandMark}>
+            {brandLogoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={brandLogoUrl} alt="" className={styles.brandMarkImg} />
+            ) : (
+              brandName[lang].split(" ").map((word) => word[0]).join("").slice(0, 2).toUpperCase()
+            )}
+            <EditableBrandLogo />
+          </div>
+          <EditableText className={styles.brandName} textKey="brandName" value={brandName} lang={lang} />
           {editMode && <span className={styles.adminBadge}>Editing</span>}
         </div>
 

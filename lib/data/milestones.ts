@@ -1,10 +1,9 @@
 import { Milestone } from "@/lib/types";
-import { createClient } from "@/lib/supabase/server";
+import { SupabaseServerClient } from "@/lib/supabase/server";
 
 // Build-Log / Meilensteine. Fortschritt wird daraus berechnet, nicht gespeichert.
 // Loaded from the `milestones` table, ordered by "order".
-export async function getMilestones(): Promise<Milestone[]> {
-  const supabase = await createClient();
+export async function getMilestones(supabase: SupabaseServerClient): Promise<Milestone[]> {
   const { data, error } = await supabase
     .from("milestones")
     .select("id, title_de, title_en, note_de, note_en, date_de, date_en, done, order")

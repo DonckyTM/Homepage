@@ -19,10 +19,6 @@ export function HomeSection({ texts: t, facts: homeFacts, lang, onGoCurrent, onO
   return (
     <>
       <div className={styles.hero}>
-        <div className={styles.pill}>
-          <span className={styles.pillDot} />
-          <EditableText textKey="statusPill" value={t.statusPill} lang={lang} />
-        </div>
         <EditableText as="h1" textKey="heroTitle" value={t.heroTitle} lang={lang} />
         <EditableText as="p" className={styles.heroBody} textKey="heroBody" value={t.heroBody} lang={lang} multiline />
 

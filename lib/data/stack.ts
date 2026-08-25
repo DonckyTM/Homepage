@@ -1,10 +1,9 @@
 import { StackTag } from "@/lib/types";
-import { createClient } from "@/lib/supabase/server";
+import { SupabaseServerClient } from "@/lib/supabase/server";
 
 // About – Stack/Tags. Names aren't translated (technology names).
 // Loaded from the `about_stack` table, ordered by "order".
-export async function getStack(): Promise<StackTag[]> {
-  const supabase = await createClient();
+export async function getStack(supabase: SupabaseServerClient): Promise<StackTag[]> {
   const { data, error } = await supabase.from("about_stack").select("id, name, icon, order").order("order");
 
   if (error) {
