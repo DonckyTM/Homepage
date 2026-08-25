@@ -22,8 +22,12 @@ eine andere Seite, keine Tabellen-Ansicht. Details siehe „Admin-Panel — Anfo
 
 - **Supabase-Projekt:** angelegt und produktiv (Region `eu-west-2`). Schema und RLS-Policies liegen
   als Migrationen in `supabase/migrations/`, Erstbefüllung in `supabase/seed.sql`.
-- **Öffentliche Seite:** `/` liest alle Inhalte live aus Supabase (`lib/data/*.ts`) — kein
-  hartcodiertes Copy mehr außer den vier Tab-IDs selbst (`lib/data/tabs.ts`).
+- **Öffentliche Seite:** `/` liest alle Inhalte aus Supabase — kein hartcodiertes Copy mehr außer
+  den vier Tab-IDs selbst (`lib/data/tabs.ts`). Der komplette Seiteninhalt kommt über **einen**
+  Aufruf der Postgres-Funktion `get_site_content()` (`lib/data/siteContent.ts`), nicht über sieben
+  Einzelabfragen. `/` wird statisch gerendert (anon-Client ohne Cookies, `revalidate = 3600`) und
+  von jeder Server Action per `revalidatePath("/")` sofort neu gebaut — Änderungen im Admin sind
+  also weiterhin unmittelbar sichtbar. `/admin` bleibt bewusst dynamisch (Session-Client).
 - **Admin-Auth:** `/admin` und `/admin/login` sind über Supabase Auth + Middleware geschützt
   (E-Mail/Passwort). Kein Selbstregistrierungs-Flow — Accounts werden manuell im Supabase-Dashboard
   angelegt.
@@ -179,6 +183,12 @@ Inhaltsfläche baut, sollte diesem Muster folgen statt eine neue Verwaltungsseit
 - Projekt-Screenshots liegen im öffentlich lesbaren Storage-Bucket `project-screenshots`
   (`supabase/migrations/20260824130000_project_screenshots_storage.sql`); Upload läuft über eine
   Server Action, die Dateityp (PNG/JPEG/WebP) und Größe (max. 5MB) vor dem Upload prüft.
+  Anschließend wird das Bild einmalig serverseitig normalisiert (`lib/imageProcessing.ts`, sharp):
+  max. 1600px breit, WebP, plus ein winziger Base64-Blur-Platzhalter in `projects.screenshot_blur`.
+  Dateipfade sind pro Upload eindeutig, deshalb wird mit `cache-control: 31536000` hochgeladen.
+  Karte und Modal rendern denselben optimierten Screenshot (`lib/images.ts` pinnt Breite und
+  Qualität), und `app/page.tsx` lädt ihn per `preload` schon vor, während noch der Home-Tab
+  sichtbar ist — sonst würde der Request erst beim Klick auf „Projects“ starten.
 - Das Kontaktformular-Postfach ist noch nicht nach diesem Muster umgesetzt.
 
 ## Security-Hinweise für Claude Code
