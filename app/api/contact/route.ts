@@ -1,27 +1,36 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { isRateLimited } from "@/lib/rateLimit";
+import { isRateLimited, CONTACT_IP_LIMIT, CONTACT_EMAIL_LIMIT } from "@/lib/rateLimit";
+import { getClientIp } from "@/lib/clientIp";
 
 const NAME_MAX = 100;
 const EMAIL_MAX = 254;
 const MESSAGE_MAX = 2000;
+// Generous ceiling on the raw payload so a huge body is rejected before it is
+// parsed, rather than after.
+const BODY_MAX_BYTES = 16 * 1024;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function getClientIp(request: NextRequest): string {
-  const forwarded = request.headers.get("x-forwarded-for");
-  if (forwarded) return forwarded.split(",")[0].trim();
-  return request.headers.get("x-real-ip") ?? "unknown";
-}
-
 export async function POST(request: NextRequest) {
+  // Cheapest rejection first: a declared oversized body needs no DB round trip.
+  const declaredLength = Number(request.headers.get("content-length") ?? "0");
+  if (declaredLength > BODY_MAX_BYTES) {
+    return NextResponse.json({ error: "invalid_body" }, { status: 413 });
+  }
+
   const ip = getClientIp(request);
-  if (isRateLimited(ip)) {
+  if (await isRateLimited(`ip:${ip}`, CONTACT_IP_LIMIT)) {
     return NextResponse.json({ error: "rate_limited" }, { status: 429 });
+  }
+
+  const raw = await request.text();
+  if (raw.length > BODY_MAX_BYTES) {
+    return NextResponse.json({ error: "invalid_body" }, { status: 413 });
   }
 
   let body: unknown;
   try {
-    body = await request.json();
+    body = JSON.parse(raw);
   } catch {
     return NextResponse.json({ error: "invalid_body" }, { status: 400 });
   }
@@ -48,6 +57,12 @@ export async function POST(request: NextRequest) {
   }
   if (!trimmedMessage || trimmedMessage.length > MESSAGE_MAX) {
     return NextResponse.json({ error: "invalid_message" }, { status: 400 });
+  }
+
+  // Second bucket so one sender cannot flood the inbox from rotating IPs.
+  // Checked after validation so the key is a well-formed address.
+  if (await isRateLimited(`email:${trimmedEmail.toLowerCase()}`, CONTACT_EMAIL_LIMIT)) {
+    return NextResponse.json({ error: "rate_limited" }, { status: 429 });
   }
 
   const supabase = createAdminClient();

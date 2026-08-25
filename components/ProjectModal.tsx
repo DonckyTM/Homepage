@@ -9,6 +9,7 @@ import { EditableWrap } from "@/components/admin/EditableWrap";
 import { EditableProjectField } from "@/components/admin/EditableProjectField";
 import { EditableTechTags } from "@/components/admin/EditableTechTags";
 import { EditableRepoUrl } from "@/components/admin/EditableRepoUrl";
+import { safeExternalUrl } from "@/lib/safeUrl";
 import { EditableScreenshot } from "@/components/admin/EditableScreenshot";
 import { useEditMode } from "@/components/admin/EditContext";
 import { updateProjectInline } from "@/app/admin/actions";
@@ -29,6 +30,10 @@ export function ProjectModal({ texts: t, projects, lang, openId, onClose }: Proj
   const editMode = useEditMode();
   const project = projects.find((p) => p.id === openId) ?? null;
   const shotUrl = project ? getScreenshotUrl(project.screenshotPath) : null;
+  // repo_url is admin-editable and reaches an href, so re-check the scheme at
+  // render time -- the column is also writable straight through PostgREST,
+  // which never passes through the server action's validation.
+  const safeRepoUrl = project ? safeExternalUrl(project.repoUrl) : null;
 
   return (
     <div
@@ -107,9 +112,9 @@ export function ProjectModal({ texts: t, projects, lang, openId, onClose }: Proj
             <EditableTechTags projectId={project.id} tags={project.techTags} />
 
             <div className={styles.actions}>
-              <EditableRepoUrl projectId={project.id} repoUrl={project.repoUrl}>
+              <EditableRepoUrl projectId={project.id} repoUrl={project.repoUrl} isValid={safeRepoUrl !== null}>
                 <EditableWrap textKey="modalRepo" value={t.modalRepo}>
-                  <a href={project.repoUrl} target="_blank" rel="noreferrer" className={styles.btnPrimary}>
+                  <a href={safeRepoUrl ?? "#"} target="_blank" rel="noreferrer" className={styles.btnPrimary}>
                     {t.modalRepo[lang]}
                   </a>
                 </EditableWrap>
