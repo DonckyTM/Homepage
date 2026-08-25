@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -76,7 +77,15 @@ export function EditableProjectCard({
     <div className={`${projectStyles.card} ${styles.listItem}`}>
       <button type="button" className={projectStyles.cardTrigger} onClick={() => onOpenProject(project.id)}>
         <div className={projectStyles.shot}>
-          {shotUrl && <img src={shotUrl} alt={project.title[lang]} className={projectStyles.shotImg} />}
+          {shotUrl && (
+            <Image
+              src={shotUrl}
+              alt={project.title[lang]}
+              fill
+              sizes="(max-width: 720px) 100vw, 460px"
+              className={projectStyles.shotImg}
+            />
+          )}
           <span className={projectStyles.num}>{String(index + 1).padStart(2, "0")}</span>
           {!shotUrl && <span className={projectStyles.shotTag}>{project.screenshotLabel[lang]}</span>}
         </div>

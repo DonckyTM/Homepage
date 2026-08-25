@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Lang, Localized, Project } from "@/lib/types";
@@ -37,7 +38,9 @@ export function ProjectModal({ texts: t, projects, lang, openId, onClose }: Proj
       {project && (
         <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
           <div className={styles.shot}>
-            {shotUrl && <img src={shotUrl} alt={project.title[lang]} className={styles.shotImg} />}
+            {shotUrl && (
+              <Image src={shotUrl} alt={project.title[lang]} fill sizes="620px" className={styles.shotImg} />
+            )}
             {!shotUrl && <span className={styles.shotTag}>{project.screenshotLabel[lang]}</span>}
             {editMode && <EditableScreenshot projectId={project.id} />}
             <button className={styles.closeBtn} aria-label="Close" onClick={onClose}>

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Lang, Localized, Project } from "@/lib/types";
 import { EditableText } from "@/components/admin/EditableText";
 import { EditableProjectCard, AddProjectCard } from "@/components/admin/EditableProjectCard";
@@ -45,7 +46,15 @@ export function ProjectsSection({ texts: t, projects, lang, onOpenProject }: Pro
           return (
             <button className={styles.card} key={p.id} onClick={() => onOpenProject(p.id)}>
               <div className={styles.shot}>
-                {shotUrl && <img src={shotUrl} alt={p.title[lang]} className={styles.shotImg} />}
+                {shotUrl && (
+                  <Image
+                    src={shotUrl}
+                    alt={p.title[lang]}
+                    fill
+                    sizes="(max-width: 720px) 100vw, 460px"
+                    className={styles.shotImg}
+                  />
+                )}
                 <span className={styles.num}>{String(i + 1).padStart(2, "0")}</span>
                 {!shotUrl && <span className={styles.shotTag}>{p.screenshotLabel[lang]}</span>}
               </div>
