@@ -45,6 +45,8 @@ export interface Project {
   techTags: string[];
   repoUrl: string;
   screenshotPath: string | null;
+  /** Tiny inline base64 LQIP, rendered while the real screenshot loads. */
+  screenshotBlur: string | null;
   screenshotLabel: Localized;
   inProgress: boolean;
 }

@@ -6,6 +6,7 @@ import { EditableText } from "@/components/admin/EditableText";
 import { EditableProjectCard, AddProjectCard } from "@/components/admin/EditableProjectCard";
 import { useEditMode } from "@/components/admin/EditContext";
 import { getScreenshotUrl } from "@/lib/supabase/storage";
+import { SCREENSHOT_SIZES, screenshotLoader } from "@/lib/images";
 import styles from "./ProjectsSection.module.css";
 
 interface ProjectsSectionProps {
@@ -51,8 +52,15 @@ export function ProjectsSection({ texts: t, projects, lang, onOpenProject }: Pro
                     src={shotUrl}
                     alt={p.title[lang]}
                     fill
-                    sizes="(max-width: 720px) 100vw, 460px"
+                    loader={screenshotLoader}
+                    sizes={SCREENSHOT_SIZES}
                     className={styles.shotImg}
+                    // The tab only mounts on click, so lazy loading would delay
+                    // the request until the card is already on screen.
+                    priority
+                    {...(p.screenshotBlur
+                      ? { placeholder: "blur" as const, blurDataURL: p.screenshotBlur }
+                      : {})}
                   />
                 )}
                 <span className={styles.num}>{String(i + 1).padStart(2, "0")}</span>

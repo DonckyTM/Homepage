@@ -1,39 +1,44 @@
+import ReactDOM from "react-dom";
 import { SiteShell } from "@/components/SiteShell";
-import { getSiteTexts } from "@/lib/data/siteTexts";
-import { getSiteSettings } from "@/lib/data/siteSettings";
-import { getHomeFacts } from "@/lib/data/homeFacts";
-import { getAboutFacts } from "@/lib/data/aboutFacts";
-import { getStack } from "@/lib/data/stack";
-import { getProjects } from "@/lib/data/projects";
-import { getMilestones } from "@/lib/data/milestones";
+import { getSiteContent } from "@/lib/data/siteContent";
 import { buildTabs } from "@/lib/data/tabs";
-import { getBrandLogoUrl } from "@/lib/supabase/storage";
-import { createClient } from "@/lib/supabase/server";
+import { getBrandLogoUrl, getScreenshotUrl } from "@/lib/supabase/storage";
+import { screenshotLoader } from "@/lib/images";
+import { createPublicClient } from "@/lib/supabase/public";
+
+// The public page is the same for every visitor, so render it once and rebuild
+// it when an admin edits something (every Server Action calls
+// revalidatePath("/")). The hourly fallback only matters if a row is changed
+// straight from the Supabase table editor.
+export const revalidate = 3600;
 
 export default async function Page() {
-  const supabase = await createClient();
-  const [siteTexts, siteSettings, homeFacts, aboutFacts, stack, projects, milestones] = await Promise.all([
-    getSiteTexts(supabase),
-    getSiteSettings(supabase),
-    getHomeFacts(supabase),
-    getAboutFacts(supabase),
-    getStack(supabase),
-    getProjects(supabase),
-    getMilestones(supabase)
-  ]);
+  const supabase = createPublicClient();
+  const content = await getSiteContent(supabase);
+  const tabs = buildTabs(content.siteTexts);
 
-  const tabs = buildTabs(siteTexts);
+  // The projects tab only mounts once it is selected, so without this the
+  // screenshot request did not start until the user clicked "Projects" and
+  // then had to wait out a cold optimizer round trip. Preloading from the
+  // initial HTML means the bytes are already in cache by then. Low priority
+  // keeps it from competing with the home tab's own rendering.
+  for (const project of content.projects) {
+    const url = getScreenshotUrl(project.screenshotPath);
+    if (url) {
+      ReactDOM.preload(screenshotLoader({ src: url }), { as: "image", fetchPriority: "low" });
+    }
+  }
 
   return (
     <SiteShell
-      siteTexts={siteTexts}
-      homeFacts={homeFacts}
-      aboutFacts={aboutFacts}
-      stack={stack}
-      projects={projects}
-      milestones={milestones}
+      siteTexts={content.siteTexts}
+      homeFacts={content.homeFacts}
+      aboutFacts={content.aboutFacts}
+      stack={content.stack}
+      projects={content.projects}
+      milestones={content.milestones}
       tabs={tabs}
-      brandLogoUrl={getBrandLogoUrl(siteSettings.brand_logo_path)}
+      brandLogoUrl={getBrandLogoUrl(content.siteSettings.brand_logo_path)}
     />
   );
 }
