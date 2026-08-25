@@ -44,7 +44,26 @@ dashboard (Project Settings → API):
 
 `.env.local` is git-ignored and never committed.
 
-## Deploying
+## Deployment
 
 Target platform is Vercel — connect the repo and it builds with the default Next.js settings, no
 extra config required.
+
+Set these as **Environment Variables** in the Vercel project settings (Project → Settings →
+Environment Variables), for Production (and Preview, if you want preview deployments to hit the
+same Supabase project) — the same three variables from `.env.local.example` above:
+
+| Variable | Notes |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | Your project's API URL. |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | The public anon key. |
+| `SUPABASE_SERVICE_ROLE_KEY` | The service role key. Mark it **sensitive** in Vercel — it must never be exposed to the browser (it isn't referenced by any client code; see [CLAUDE.md](CLAUDE.md)'s security notes). |
+
+These must be set in the Vercel project, not committed to the repo — `.env.local` stays
+git-ignored and is only used for local development.
+
+`/` is statically prerendered at build time and fetches its content from Supabase during that
+prerender (see [CLAUDE.md](CLAUDE.md)), so `NEXT_PUBLIC_SUPABASE_URL` and
+`NEXT_PUBLIC_SUPABASE_ANON_KEY` need to be available at **build time**, not just at runtime — set
+them for the Production environment before the first deploy, or the build will fail while
+prerendering `/`.
