@@ -14,6 +14,7 @@ import { EditableScreenshot } from "@/components/admin/EditableScreenshot";
 import { useEditMode } from "@/components/admin/EditContext";
 import { updateProjectInline } from "@/app/admin/actions";
 import { getScreenshotUrl } from "@/lib/supabase/storage";
+import { SCREENSHOT_SIZES, screenshotLoader } from "@/lib/images";
 import styles from "./ProjectModal.module.css";
 import shared from "./shared.module.css";
 import adminStyles from "@/components/admin/Editable.module.css";
@@ -44,7 +45,18 @@ export function ProjectModal({ texts: t, projects, lang, openId, onClose }: Proj
         <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
           <div className={styles.shot}>
             {shotUrl && (
-              <Image src={shotUrl} alt={project.title[lang]} fill sizes="620px" className={styles.shotImg} />
+              <Image
+                src={shotUrl}
+                alt={project.title[lang]}
+                fill
+                loader={screenshotLoader}
+                sizes={SCREENSHOT_SIZES}
+                className={styles.shotImg}
+                priority
+                {...(project.screenshotBlur
+                  ? { placeholder: "blur" as const, blurDataURL: project.screenshotBlur }
+                  : {})}
+              />
             )}
             {!shotUrl && <span className={styles.shotTag}>{project.screenshotLabel[lang]}</span>}
             {editMode && <EditableScreenshot projectId={project.id} />}

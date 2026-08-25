@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth/requireAdmin";
+import { processBrandLogo, processScreenshot } from "@/lib/imageProcessing";
 import {
   assertUuid,
   assertDirection,
@@ -417,6 +418,11 @@ export async function updateProjectInline(id: string, fields: ProjectUpdateField
   refresh();
 }
 
+// Upload paths are unique per upload (they carry a timestamp) and are never
+// rewritten, so the stored object can be cached forever. The default is one
+// hour, which meant every CDN and browser re-fetched the file all day.
+const IMMUTABLE_CACHE_CONTROL = "31536000";
+
 const SCREENSHOT_BUCKET = "project-screenshots";
 const ALLOWED_SCREENSHOT_TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
 const MAX_SCREENSHOT_BYTES = 5 * 1024 * 1024;
@@ -448,18 +454,28 @@ export async function uploadProjectScreenshotInline(id: string, formData: FormDa
     throw new Error("Project not found.");
   }
 
-  const extension = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
-  const path = `${id}/${Date.now()}.${extension}`;
+  // Re-encode once here rather than making every image request pay for the
+  // original: a full-resolution PNG turns into ~50-100KB of WebP, and we get a
+  // tiny inline placeholder to show while that WebP is in flight.
+  const processed = await processScreenshot(Buffer.from(await file.arrayBuffer()));
+  const path = `${id}/${Date.now()}.${processed.extension}`;
 
   const { error: uploadError } = await supabase.storage
     .from(SCREENSHOT_BUCKET)
-    .upload(path, file, { contentType: file.type, upsert: true });
+    .upload(path, processed.data, {
+      contentType: processed.contentType,
+      cacheControl: IMMUTABLE_CACHE_CONTROL,
+      upsert: true
+    });
 
   if (uploadError) {
     throw new Error(`Failed to upload screenshot: ${uploadError.message}`);
   }
 
-  const { error } = await supabase.from("projects").update({ screenshot_path: path }).eq("id", id);
+  const { error } = await supabase
+    .from("projects")
+    .update({ screenshot_path: path, screenshot_blur: processed.blurDataUrl })
+    .eq("id", id);
 
   if (error) {
     throw new Error(`Failed to save screenshot: ${error.message}`);
@@ -652,12 +668,16 @@ export async function uploadBrandLogoInline(formData: FormData) {
     .eq("key", "brand_logo_path")
     .maybeSingle();
 
-  const extension = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
-  const path = `logo-${Date.now()}.${extension}`;
+  const processed = await processBrandLogo(Buffer.from(await file.arrayBuffer()));
+  const path = `logo-${Date.now()}.${processed.extension}`;
 
   const { error: uploadError } = await supabase.storage
     .from(BRAND_ASSETS_BUCKET)
-    .upload(path, file, { contentType: file.type, upsert: true });
+    .upload(path, processed.data, {
+      contentType: processed.contentType,
+      cacheControl: IMMUTABLE_CACHE_CONTROL,
+      upsert: true
+    });
 
   if (uploadError) {
     throw new Error(`Failed to upload logo: ${uploadError.message}`);

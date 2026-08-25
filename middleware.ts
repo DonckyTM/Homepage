@@ -3,20 +3,41 @@ import { NextResponse, type NextRequest } from "next/server";
 
 const SUPABASE_ORIGIN = "https://lryiyomuurzzktsyuheh.supabase.co";
 
-// Per-request nonce for the CSP. Next.js detects a nonce in the script-src
-// directive and propagates it to its own inline bootstrap scripts, so no
-// 'unsafe-inline' is needed for scripts.
-function buildCsp(nonce: string): string {
+// Next.js only threads a CSP nonce into the HTML it renders for THAT request.
+// Statically generated pages (prerendered at build time / revalidated in the
+// background, with no request in scope) get no nonce baked into their inline
+// hydration scripts at all -- so a nonce that changes every request can never
+// match them. Serving a nonce-strict script-src to a static route blocks
+// every script on the page, including its own hydration payload: confirmed by
+// loading the built app and watching Next's own chunks and __next_f bootstrap
+// scripts get rejected by the browser.
+//
+// "/" and "/admin/login" are prerendered (see the "next build" route summary
+// -- both list as "○ Static"); "/admin", "/admin/contact" and the API route
+// read cookies()/are Route Handlers, which forces per-request rendering, so a
+// nonce is safe there. If a future change makes an /admin page static, the
+// build's route summary will start listing it as "○" -- that is the signal
+// to add it to STATIC_ROUTES below, or the CSP will silently break it exactly
+// like this did for /admin/login.
+const STATIC_ROUTES = new Set(["/", "/admin/login"]);
+
+function buildCsp(nonce: string | null): string {
+  const isDevEval = process.env.NODE_ENV !== "production" ? " 'unsafe-eval'" : "";
+
+  const scriptSrc = nonce
+    ? `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDevEval}`
+    // No nonce available for a statically rendered page (see above): 'self'
+    // still blocks third-party/attacker-hosted script sources, which is the
+    // main script-src threat model for a page with no dangerouslySetInnerHTML
+    // and no attacker-controlled <script> content anywhere in this app.
+    : `script-src 'self' 'unsafe-inline'${isDevEval}`;
+
   return [
     "default-src 'self'",
-    // React's dev build needs eval() for its debugging features; the
-    // production build never does, so the relaxation is scoped to dev only.
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${
-      process.env.NODE_ENV === "production" ? "" : " 'unsafe-eval'"
-    }`,
-    // 'unsafe-inline' is deliberate for styles only: the components use inline
+    scriptSrc,
+    // 'unsafe-inline' is deliberate for styles: the components use inline
     // style={{...}} attributes, and CSP3 offers no nonce path for style
-    // *attributes*. Scripts -- the actual XSS vector -- get no such escape.
+    // *attributes*.
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com",
     `img-src 'self' blob: data: ${SUPABASE_ORIGIN}`,
@@ -71,12 +92,15 @@ async function guardAdminRoute(request: NextRequest, response: NextResponse) {
 }
 
 export async function middleware(request: NextRequest) {
-  const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
+  const isStatic = STATIC_ROUTES.has(request.nextUrl.pathname);
+  const nonce = isStatic ? null : Buffer.from(crypto.randomUUID()).toString("base64");
   const csp = buildCsp(nonce);
 
-  // Forward the nonce to the render so Server Components can read it.
   const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-nonce", nonce);
+  if (nonce) {
+    // Forward the nonce to the render so Server Components can read it.
+    requestHeaders.set("x-nonce", nonce);
+  }
   requestHeaders.set("content-security-policy", csp);
 
   let response = NextResponse.next({ request: { headers: requestHeaders } });
