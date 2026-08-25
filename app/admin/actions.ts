@@ -2,7 +2,18 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { requireAdmin } from "@/lib/auth/requireAdmin";
 import { processBrandLogo, processScreenshot } from "@/lib/imageProcessing";
+import {
+  assertUuid,
+  assertDirection,
+  assertText,
+  assertSiteTextKey,
+  assertProjectFields,
+  assertImageBytesMatchType,
+  LIMITS,
+  type ProjectUpdateFields
+} from "./validation";
 
 function refresh() {
   revalidatePath("/admin");
@@ -10,6 +21,10 @@ function refresh() {
 }
 
 export async function updateSiteTextInline(key: string, valueDe: string, valueEn: string) {
+  await requireAdmin();
+  key = assertSiteTextKey(key);
+  valueDe = assertText(valueDe, LIMITS.siteTextValue, "Text (DE)");
+  valueEn = assertText(valueEn, LIMITS.siteTextValue, "Text (EN)");
   const supabase = await createClient();
   const { error } = await supabase
     .from("site_texts")
@@ -24,6 +39,11 @@ export async function updateSiteTextInline(key: string, valueDe: string, valueEn
 }
 
 export async function createHomeFactInline(labelDe: string, labelEn: string, valueDe: string, valueEn: string) {
+  await requireAdmin();
+  labelDe = assertText(labelDe, LIMITS.shortText, "Label (DE)");
+  labelEn = assertText(labelEn, LIMITS.shortText, "Label (EN)");
+  valueDe = assertText(valueDe, LIMITS.shortText, "Value (DE)");
+  valueEn = assertText(valueEn, LIMITS.shortText, "Value (EN)");
   const supabase = await createClient();
 
   const { data: existing, error: fetchError } = await supabase
@@ -56,6 +76,12 @@ export async function updateHomeFactInline(
   valueDe: string,
   valueEn: string
 ) {
+  await requireAdmin();
+  assertUuid(id);
+  labelDe = assertText(labelDe, LIMITS.shortText, "Label (DE)");
+  labelEn = assertText(labelEn, LIMITS.shortText, "Label (EN)");
+  valueDe = assertText(valueDe, LIMITS.shortText, "Value (DE)");
+  valueEn = assertText(valueEn, LIMITS.shortText, "Value (EN)");
   const supabase = await createClient();
   const { error } = await supabase
     .from("home_facts")
@@ -70,6 +96,8 @@ export async function updateHomeFactInline(
 }
 
 export async function deleteHomeFactInline(id: string) {
+  await requireAdmin();
+  assertUuid(id);
   const supabase = await createClient();
   const { error } = await supabase.from("home_facts").delete().eq("id", id);
 
@@ -81,6 +109,9 @@ export async function deleteHomeFactInline(id: string) {
 }
 
 export async function moveHomeFactInline(id: string, direction: "up" | "down") {
+  await requireAdmin();
+  assertUuid(id);
+  direction = assertDirection(direction);
   const supabase = await createClient();
   const { data: rows, error: fetchError } = await supabase.from("home_facts").select("id, order").order("order");
 
@@ -112,6 +143,11 @@ export async function moveHomeFactInline(id: string, direction: "up" | "down") {
 }
 
 export async function createAboutFactInline(labelDe: string, labelEn: string, valueDe: string, valueEn: string) {
+  await requireAdmin();
+  labelDe = assertText(labelDe, LIMITS.shortText, "Label (DE)");
+  labelEn = assertText(labelEn, LIMITS.shortText, "Label (EN)");
+  valueDe = assertText(valueDe, LIMITS.shortText, "Value (DE)");
+  valueEn = assertText(valueEn, LIMITS.shortText, "Value (EN)");
   const supabase = await createClient();
 
   const { data: existing, error: fetchError } = await supabase
@@ -144,6 +180,12 @@ export async function updateAboutFactInline(
   valueDe: string,
   valueEn: string
 ) {
+  await requireAdmin();
+  assertUuid(id);
+  labelDe = assertText(labelDe, LIMITS.shortText, "Label (DE)");
+  labelEn = assertText(labelEn, LIMITS.shortText, "Label (EN)");
+  valueDe = assertText(valueDe, LIMITS.shortText, "Value (DE)");
+  valueEn = assertText(valueEn, LIMITS.shortText, "Value (EN)");
   const supabase = await createClient();
   const { error } = await supabase
     .from("about_facts")
@@ -158,6 +200,8 @@ export async function updateAboutFactInline(
 }
 
 export async function deleteAboutFactInline(id: string) {
+  await requireAdmin();
+  assertUuid(id);
   const supabase = await createClient();
   const { error } = await supabase.from("about_facts").delete().eq("id", id);
 
@@ -169,6 +213,9 @@ export async function deleteAboutFactInline(id: string) {
 }
 
 export async function moveAboutFactInline(id: string, direction: "up" | "down") {
+  await requireAdmin();
+  assertUuid(id);
+  direction = assertDirection(direction);
   const supabase = await createClient();
   const { data: rows, error: fetchError } = await supabase.from("about_facts").select("id, order").order("order");
 
@@ -200,6 +247,9 @@ export async function moveAboutFactInline(id: string, direction: "up" | "down") 
 }
 
 export async function createStackTagInline(name: string, icon: string) {
+  await requireAdmin();
+  name = assertText(name, LIMITS.tagName, "Name");
+  icon = assertText(icon, LIMITS.tagName, "Icon");
   const supabase = await createClient();
 
   const { data: existing, error: fetchError } = await supabase
@@ -226,6 +276,10 @@ export async function createStackTagInline(name: string, icon: string) {
 }
 
 export async function updateStackTagInline(id: string, name: string, icon: string) {
+  await requireAdmin();
+  assertUuid(id);
+  name = assertText(name, LIMITS.tagName, "Name");
+  icon = assertText(icon, LIMITS.tagName, "Icon");
   const supabase = await createClient();
   const { error } = await supabase
     .from("about_stack")
@@ -240,6 +294,8 @@ export async function updateStackTagInline(id: string, name: string, icon: strin
 }
 
 export async function deleteStackTagInline(id: string) {
+  await requireAdmin();
+  assertUuid(id);
   const supabase = await createClient();
   const { error } = await supabase.from("about_stack").delete().eq("id", id);
 
@@ -251,6 +307,9 @@ export async function deleteStackTagInline(id: string) {
 }
 
 export async function moveStackTagInline(id: string, direction: "up" | "down") {
+  await requireAdmin();
+  assertUuid(id);
+  direction = assertDirection(direction);
   const supabase = await createClient();
   const { data: rows, error: fetchError } = await supabase.from("about_stack").select("id, order").order("order");
 
@@ -282,6 +341,11 @@ export async function moveStackTagInline(id: string, direction: "up" | "down") {
 }
 
 export async function createProjectInline(titleDe: string, titleEn: string, blurbDe: string, blurbEn: string) {
+  await requireAdmin();
+  titleDe = assertText(titleDe, LIMITS.shortText, "Title (DE)");
+  titleEn = assertText(titleEn, LIMITS.shortText, "Title (EN)");
+  blurbDe = assertText(blurbDe, LIMITS.mediumText, "Blurb (DE)");
+  blurbEn = assertText(blurbEn, LIMITS.mediumText, "Blurb (EN)");
   const supabase = await createClient();
 
   const { data: existing, error: fetchError } = await supabase
@@ -322,25 +386,10 @@ export async function createProjectInline(titleDe: string, titleEn: string, blur
   refresh();
 }
 
-interface ProjectUpdateFields {
-  titleDe?: string;
-  titleEn?: string;
-  blurbDe?: string;
-  blurbEn?: string;
-  long1De?: string;
-  long1En?: string;
-  long2De?: string;
-  long2En?: string;
-  roleDe?: string;
-  roleEn?: string;
-  yearDe?: string;
-  yearEn?: string;
-  techTags?: string[];
-  repoUrl?: string;
-  inProgress?: boolean;
-}
-
 export async function updateProjectInline(id: string, fields: ProjectUpdateFields) {
+  await requireAdmin();
+  assertUuid(id);
+  fields = assertProjectFields(fields);
   const supabase = await createClient();
 
   const update: Record<string, unknown> = {};
@@ -379,6 +428,8 @@ const ALLOWED_SCREENSHOT_TYPES = new Set(["image/png", "image/jpeg", "image/webp
 const MAX_SCREENSHOT_BYTES = 5 * 1024 * 1024;
 
 export async function uploadProjectScreenshotInline(id: string, formData: FormData) {
+  await requireAdmin();
+  assertUuid(id);
   const file = formData.get("file");
   if (!(file instanceof File)) {
     throw new Error("No file provided.");
@@ -389,10 +440,19 @@ export async function uploadProjectScreenshotInline(id: string, formData: FormDa
   if (file.size > MAX_SCREENSHOT_BYTES) {
     throw new Error("Image must be 5MB or smaller.");
   }
+  // file.type is client-declared and is what Storage will serve the object
+  // back as, so confirm the bytes match before trusting it.
+  await assertImageBytesMatchType(file, file.type);
 
   const supabase = await createClient();
 
   const { data: existing } = await supabase.from("projects").select("screenshot_path").eq("id", id).maybeSingle();
+
+  // The id is interpolated into the storage object key below, so confirm the
+  // row exists before writing anything rather than after.
+  if (!existing) {
+    throw new Error("Project not found.");
+  }
 
   // Re-encode once here rather than making every image request pay for the
   // original: a full-resolution PNG turns into ~50-100KB of WebP, and we get a
@@ -429,6 +489,8 @@ export async function uploadProjectScreenshotInline(id: string, formData: FormDa
 }
 
 export async function deleteProjectInline(id: string) {
+  await requireAdmin();
+  assertUuid(id);
   const supabase = await createClient();
 
   const { data: existing } = await supabase.from("projects").select("screenshot_path").eq("id", id).maybeSingle();
@@ -447,6 +509,9 @@ export async function deleteProjectInline(id: string) {
 }
 
 export async function moveProjectInline(id: string, direction: "up" | "down") {
+  await requireAdmin();
+  assertUuid(id);
+  direction = assertDirection(direction);
   const supabase = await createClient();
   const { data: rows, error: fetchError } = await supabase.from("projects").select("id, order").order("order");
 
@@ -485,6 +550,13 @@ export async function createMilestoneInline(
   dateDe: string,
   dateEn: string
 ) {
+  await requireAdmin();
+  titleDe = assertText(titleDe, LIMITS.shortText, "Title (DE)");
+  titleEn = assertText(titleEn, LIMITS.shortText, "Title (EN)");
+  noteDe = assertText(noteDe, LIMITS.mediumText, "Note (DE)");
+  noteEn = assertText(noteEn, LIMITS.mediumText, "Note (EN)");
+  dateDe = assertText(dateDe, LIMITS.shortText, "Date (DE)");
+  dateEn = assertText(dateEn, LIMITS.shortText, "Date (EN)");
   const supabase = await createClient();
 
   const { data: existing, error: fetchError } = await supabase
@@ -526,6 +598,14 @@ export async function updateMilestoneInline(
   dateDe: string,
   dateEn: string
 ) {
+  await requireAdmin();
+  assertUuid(id);
+  titleDe = assertText(titleDe, LIMITS.shortText, "Title (DE)");
+  titleEn = assertText(titleEn, LIMITS.shortText, "Title (EN)");
+  noteDe = assertText(noteDe, LIMITS.mediumText, "Note (DE)");
+  noteEn = assertText(noteEn, LIMITS.mediumText, "Note (EN)");
+  dateDe = assertText(dateDe, LIMITS.shortText, "Date (DE)");
+  dateEn = assertText(dateEn, LIMITS.shortText, "Date (EN)");
   const supabase = await createClient();
   const { error } = await supabase
     .from("milestones")
@@ -543,6 +623,9 @@ const MONTHS_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"
 const MONTHS_DE = ["Jan.", "Feb.", "Mär.", "Apr.", "Mai", "Jun.", "Jul.", "Aug.", "Sep.", "Okt.", "Nov.", "Dez."];
 
 export async function toggleMilestoneDoneInline(id: string, done: boolean) {
+  await requireAdmin();
+  assertUuid(id);
+  done = done === true;
   const supabase = await createClient();
 
   const now = new Date();
@@ -564,6 +647,7 @@ const ALLOWED_BRAND_LOGO_TYPES = new Set(["image/png", "image/jpeg", "image/webp
 const MAX_BRAND_LOGO_BYTES = 2 * 1024 * 1024;
 
 export async function uploadBrandLogoInline(formData: FormData) {
+  await requireAdmin();
   const file = formData.get("file");
   if (!(file instanceof File)) {
     throw new Error("No file provided.");
@@ -574,6 +658,7 @@ export async function uploadBrandLogoInline(formData: FormData) {
   if (file.size > MAX_BRAND_LOGO_BYTES) {
     throw new Error("Image must be 2MB or smaller.");
   }
+  await assertImageBytesMatchType(file, file.type);
 
   const supabase = await createClient();
 
@@ -614,6 +699,8 @@ export async function uploadBrandLogoInline(formData: FormData) {
 }
 
 export async function deleteMilestoneInline(id: string) {
+  await requireAdmin();
+  assertUuid(id);
   const supabase = await createClient();
   const { error } = await supabase.from("milestones").delete().eq("id", id);
 
@@ -625,6 +712,9 @@ export async function deleteMilestoneInline(id: string) {
 }
 
 export async function moveMilestoneInline(id: string, direction: "up" | "down") {
+  await requireAdmin();
+  assertUuid(id);
+  direction = assertDirection(direction);
   const supabase = await createClient();
   const { data: rows, error: fetchError } = await supabase.from("milestones").select("id, order").order("order");
 

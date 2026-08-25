@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Lang, Localized, TabDef, TabId, Theme } from "@/lib/types";
@@ -49,8 +50,9 @@ export function Header({
         <div className={styles.brand}>
           <div className={styles.brandMark}>
             {brandLogoUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={brandLogoUrl} alt="" className={styles.brandMarkImg} />
+              // next/image rather than a raw <img> so the URL is constrained by
+              // the remotePatterns allow-list in next.config.mjs.
+              <Image src={brandLogoUrl} alt="" width={32} height={32} className={styles.brandMarkImg} />
             ) : (
               brandName[lang].split(" ").map((word) => word[0]).join("").slice(0, 2).toUpperCase()
             )}

@@ -1,70 +1,44 @@
 "use client";
 
-import { FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
+import { signInAction, type LoginState } from "./actions";
 import styles from "./page.module.css";
 
+const INITIAL: LoginState = { error: null };
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <button type="submit" className={styles.submit} disabled={pending}>
+      {pending ? "Logging in…" : "Log in"}
+    </button>
+  );
+}
+
 export default function AdminLoginPage() {
-  const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setError(null);
-    setLoading(true);
-
-    const supabase = createClient();
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-
-    setLoading(false);
-
-    if (signInError) {
-      setError(signInError.message);
-      return;
-    }
-
-    router.push("/admin");
-    router.refresh();
-  }
+  const [state, formAction] = useActionState(signInAction, INITIAL);
 
   return (
     <div id="app" data-theme="light">
       <main className={styles.main}>
-        <form className={styles.card} onSubmit={handleSubmit}>
+        <form className={styles.card} action={formAction}>
           <p className={styles.eyebrow}>Admin</p>
           <h1 className={styles.title}>Log in</h1>
 
           <label className={styles.field}>
             <span>Email</span>
-            <input
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              autoComplete="email"
-              required
-            />
+            <input type="email" name="email" autoComplete="email" required />
           </label>
 
           <label className={styles.field}>
             <span>Password</span>
-            <input
-              type="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              autoComplete="current-password"
-              required
-            />
+            <input type="password" name="password" autoComplete="current-password" required />
           </label>
 
-          {error && <p className={styles.error}>{error}</p>}
+          {state.error && <p className={styles.error}>{state.error}</p>}
 
-          <button type="submit" className={styles.submit} disabled={loading}>
-            {loading ? "Logging in…" : "Log in"}
-          </button>
+          <SubmitButton />
         </form>
       </main>
     </div>

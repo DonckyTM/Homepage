@@ -10,13 +10,17 @@ import styles from "./Editable.module.css";
 interface EditableRepoUrlProps {
   projectId: string;
   repoUrl: string;
+  // Whether repoUrl passed the http(s) scheme check. Kept separate from
+  // repoUrl itself so an admin can still open the editor to fix a bad value
+  // that never renders as a link.
+  isValid: boolean;
   children: React.ReactNode;
 }
 
 // Wraps the repo link/button. In edit mode it adds a pencil to change the
 // URL, or an "add" trigger when there isn't one yet (in which case the
 // children — the actual link — aren't rendered, mirroring the read view).
-export function EditableRepoUrl({ projectId, repoUrl, children }: EditableRepoUrlProps) {
+export function EditableRepoUrl({ projectId, repoUrl, isValid, children }: EditableRepoUrlProps) {
   const editMode = useEditMode();
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(repoUrl);
@@ -24,7 +28,7 @@ export function EditableRepoUrl({ projectId, repoUrl, children }: EditableRepoUr
   const router = useRouter();
 
   if (!editMode) {
-    return repoUrl ? <>{children}</> : null;
+    return isValid ? <>{children}</> : null;
   }
 
   function startEdit() {
@@ -44,7 +48,7 @@ export function EditableRepoUrl({ projectId, repoUrl, children }: EditableRepoUr
     <span className={styles.editHost} style={{ display: "inline-flex", alignItems: "center", position: "relative" }}>
       {repoUrl ? (
         <>
-          {children}
+          {isValid ? children : <span className={styles.invalidValue}>Invalid repo link</span>}
           <button type="button" className={styles.pencil} aria-label="Edit repo link" onClick={startEdit}>
             ✎
           </button>
