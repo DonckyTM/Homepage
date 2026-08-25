@@ -12,6 +12,7 @@ import {
 import { Lang, Localized, Project } from "@/lib/types";
 import { EditPopover } from "./EditPopover";
 import { getScreenshotUrl } from "@/lib/supabase/storage";
+import { SCREENSHOT_SIZES, screenshotLoader } from "@/lib/images";
 import projectStyles from "@/components/ProjectsSection.module.css";
 import styles from "./Editable.module.css";
 
@@ -82,8 +83,13 @@ export function EditableProjectCard({
               src={shotUrl}
               alt={project.title[lang]}
               fill
-              sizes="(max-width: 720px) 100vw, 460px"
+              loader={screenshotLoader}
+              sizes={SCREENSHOT_SIZES}
               className={projectStyles.shotImg}
+              priority
+              {...(project.screenshotBlur
+                ? { placeholder: "blur" as const, blurDataURL: project.screenshotBlur }
+                : {})}
             />
           )}
           <span className={projectStyles.num}>{String(index + 1).padStart(2, "0")}</span>
