@@ -1,10 +1,9 @@
 import { Project } from "@/lib/types";
-import { createClient } from "@/lib/supabase/server";
+import { SupabaseServerClient } from "@/lib/supabase/server";
 
 // Projekte: Titel, Kurzbeschreibung, Langtext, Rolle, Jahr, Tech-Tags, Repo-Link, Screenshot.
 // Loaded from the `projects` table, ordered by "order".
-export async function getProjects(): Promise<Project[]> {
-  const supabase = await createClient();
+export async function getProjects(supabase: SupabaseServerClient): Promise<Project[]> {
   const { data, error } = await supabase
     .from("projects")
     .select(

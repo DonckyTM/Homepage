@@ -1,10 +1,9 @@
 import { AboutFact } from "@/lib/types";
-import { createClient } from "@/lib/supabase/server";
+import { SupabaseServerClient } from "@/lib/supabase/server";
 
 // About – Fakten-Tabelle: Rolle, Unternehmen, Lehrjahr, Standort, Schwerpunkt.
 // Loaded from the `about_facts` table, ordered by "order".
-export async function getAboutFacts(): Promise<AboutFact[]> {
-  const supabase = await createClient();
+export async function getAboutFacts(supabase: SupabaseServerClient): Promise<AboutFact[]> {
   const { data, error } = await supabase
     .from("about_facts")
     .select("id, label_de, label_en, value_de, value_en, order")
