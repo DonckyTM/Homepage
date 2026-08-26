@@ -7,7 +7,7 @@
 }
 .backdropOpen { display: flex; }
 .modal {
-  width: 100%; max-width: 620px; max-height: 86vh; overflow-y: auto; background: var(--panel);
+  width: 100%; max-width: 620px; max-height: 86vh; max-height: 86dvh; overflow-y: auto; background: var(--panel);
   border: 1px solid var(--line); border-radius: 26px; box-shadow: 0 32px 80px rgba(0,0,0,0.28);
   animation: dcSheet 320ms cubic-bezier(0.32,0.72,0,1) both;
 }

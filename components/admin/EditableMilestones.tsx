@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useOptimistic, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   createMilestoneInline,
@@ -70,11 +70,14 @@ function MilestoneRow({
   const [dateDe, setDateDe] = useState(milestone.date.de);
   const [dateEn, setDateEn] = useState(milestone.date.en);
   const [pending, startTransition] = useTransition();
+  const [optimisticDone, setOptimisticDone] = useOptimistic(milestone.done, (_state, next: boolean) => next);
   const router = useRouter();
 
   function toggleDone() {
+    const next = !milestone.done;
     startTransition(async () => {
-      await toggleMilestoneDoneInline(milestone.id, !milestone.done);
+      setOptimisticDone(next);
+      await toggleMilestoneDoneInline(milestone.id, next);
       router.refresh();
     });
   }
@@ -112,18 +115,18 @@ function MilestoneRow({
   }
 
   return (
-    <div className={`${currentStyles.milestone} ${milestone.done ? currentStyles.milestoneDone : ""} ${styles.listItem}`}>
+    <div className={`${currentStyles.milestone} ${optimisticDone ? currentStyles.milestoneDone : ""} ${styles.listItem}`}>
       <button
         type="button"
         className={currentStyles.dot}
         onClick={toggleDone}
         disabled={pending}
-        aria-label={milestone.done ? "Mark as not done" : "Mark as done"}
+        aria-label={optimisticDone ? "Mark as not done" : "Mark as done"}
         // Only the family is inherited — the `font` shorthand would clobber the
         // font-size/weight the .dot class sets for the checkmark glyph.
         style={{ appearance: "none", padding: 0, fontFamily: "inherit", cursor: pending ? "default" : "pointer" }}
       >
-        {milestone.done ? "✓" : ""}
+        {optimisticDone ? "✓" : ""}
       </button>
       <div className={currentStyles.milestoneBody}>
         <div className={currentStyles.milestoneTitle}>{milestone.title[lang]}</div>
