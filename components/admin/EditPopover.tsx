@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import styles from "./Editable.module.css";
 
 interface Field {
@@ -18,8 +19,18 @@ interface EditPopoverProps {
 }
 
 export function EditPopover({ fields, onSave, onCancel, pending, saveLabel }: EditPopoverProps) {
+  const ref = useRef<HTMLSpanElement>(null);
+
+  // The popover opens below its trigger, which can push the Save/Cancel
+  // buttons past the bottom of the viewport (e.g. editing the last item in a
+  // list, or on a short mobile screen) with no way to scroll them into view.
+  // Center it in the viewport as soon as it mounts so it's always reachable.
+  useEffect(() => {
+    ref.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, []);
+
   return (
-    <span className={styles.popover} onClick={(event) => event.stopPropagation()}>
+    <span ref={ref} className={styles.popover} onClick={(event) => event.stopPropagation()}>
       {fields.map((field, index) => (
         <label className={styles.popoverField} key={index}>
           <span>{field.label}</span>

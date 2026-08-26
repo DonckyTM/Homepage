@@ -41,6 +41,8 @@
   flex-direction: column;
   gap: 10px;
   width: min(360px, 84vw);
+  max-height: min(70vh, 560px);
+  overflow-y: auto;
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 14px;

@@ -1,9 +1,14 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Florian Dehm",
   description: "Florian Dehm — software engineering apprentice at Deutsche Börse, Frankfurt. Backend systems and C++."
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
