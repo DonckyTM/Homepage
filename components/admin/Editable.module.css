@@ -92,7 +92,17 @@
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  margin-top: 2px;
+  /* Pinned to the top of the popover (not the bottom, where a mobile
+     keyboard opening for an autofocused field would cover it) so Save/Cancel
+     stay reachable no matter how tall the field list is or how much of the
+     popover the on-screen keyboard hides. */
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--panel);
+  margin: -14px -14px 2px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
 }
 
 .popoverSave,
