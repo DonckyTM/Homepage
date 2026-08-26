@@ -40,8 +40,8 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  width: min(360px, 84vw);
-  max-height: min(70vh, 560px);
+  width: min(420px, 90vw);
+  max-height: min(85vh, 720px);
   overflow-y: auto;
   background: var(--panel);
   border: 1px solid var(--line);
@@ -92,17 +92,17 @@
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  /* Pinned to the top of the popover (not the bottom, where a mobile
-     keyboard opening for an autofocused field would cover it) so Save/Cancel
-     stay reachable no matter how tall the field list is or how much of the
-     popover the on-screen keyboard hides. */
+  /* Pinned to the popover's own bottom edge (not just placed after the
+     fields) so Save/Cancel stay reachable even if the popover itself still
+     needs to scroll internally, instead of scrolling away with the fields. */
   position: sticky;
-  top: 0;
+  bottom: 0;
   z-index: 2;
   background: var(--panel);
-  margin: -14px -14px 2px;
+  margin: 2px -14px -14px;
   padding: 10px 14px;
-  border-bottom: 1px solid var(--line);
+  border-top: 1px solid var(--line);
+  border-radius: 0 0 14px 14px;
 }
 
 .popoverSave,

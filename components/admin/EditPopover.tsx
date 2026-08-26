@@ -24,9 +24,8 @@ export function EditPopover({ fields, onSave, onCancel, pending, saveLabel }: Ed
   // The popover opens below its trigger, which can push most of it past the
   // bottom of the viewport (e.g. editing the last item in a list). Center it
   // as soon as it mounts so it's actually on screen; Save/Cancel themselves
-  // are pinned to the popover's own top edge (see .popoverActions) so they
-  // stay reachable even if a field's autofocus later opens the keyboard and
-  // shrinks the visible area further.
+  // are pinned to the popover's own bottom edge (see .popoverActions) so they
+  // stay reachable even if the popover itself still needs to scroll.
   useEffect(() => {
     // "smooth" here is unreliable: two mount-effect passes in a row (e.g.
     // React's dev Strict Mode double-invoke) can cancel a smooth scroll
@@ -37,14 +36,6 @@ export function EditPopover({ fields, onSave, onCancel, pending, saveLabel }: Ed
 
   return (
     <span ref={ref} className={styles.popover} onClick={(event) => event.stopPropagation()}>
-      <span className={styles.popoverActions}>
-        <button type="button" className={styles.popoverCancel} onClick={onCancel} disabled={pending}>
-          Cancel
-        </button>
-        <button type="button" className={styles.popoverSave} onClick={onSave} disabled={pending}>
-          {pending ? "Saving…" : (saveLabel ?? "Save")}
-        </button>
-      </span>
       {fields.map((field, index) => (
         <label className={styles.popoverField} key={index}>
           <span>{field.label}</span>
@@ -59,6 +50,14 @@ export function EditPopover({ fields, onSave, onCancel, pending, saveLabel }: Ed
           )}
         </label>
       ))}
+      <span className={styles.popoverActions}>
+        <button type="button" className={styles.popoverCancel} onClick={onCancel} disabled={pending}>
+          Cancel
+        </button>
+        <button type="button" className={styles.popoverSave} onClick={onSave} disabled={pending}>
+          {pending ? "Saving…" : (saveLabel ?? "Save")}
+        </button>
+      </span>
     </span>
   );
 }
