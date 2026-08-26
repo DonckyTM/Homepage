@@ -21,35 +21,22 @@ interface EditPopoverProps {
 export function EditPopover({ fields, onSave, onCancel, pending, saveLabel }: EditPopoverProps) {
   const ref = useRef<HTMLSpanElement>(null);
 
-  // The popover opens below its trigger, which can push the Save/Cancel
-  // buttons past the bottom of the viewport (e.g. editing the last item in a
-  // list, or on a short mobile screen) with no way to scroll them into view.
-  // Center it in the viewport as soon as it mounts so it's always reachable.
+  // The popover opens below its trigger, which can push most of it past the
+  // bottom of the viewport (e.g. editing the last item in a list). Center it
+  // as soon as it mounts so it's actually on screen; Save/Cancel themselves
+  // are pinned to the popover's own top edge (see .popoverActions) so they
+  // stay reachable even if a field's autofocus later opens the keyboard and
+  // shrinks the visible area further.
   useEffect(() => {
-    ref.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+    // "smooth" here is unreliable: two mount-effect passes in a row (e.g.
+    // React's dev Strict Mode double-invoke) can cancel a smooth scroll
+    // mid-animation and leave it wherever it happened to stop, so use an
+    // instant jump instead.
+    ref.current?.scrollIntoView({ block: "center", behavior: "instant" });
   }, []);
 
   return (
     <span ref={ref} className={styles.popover} onClick={(event) => event.stopPropagation()}>
-      {fields.map((field, index) => (
-        <label className={styles.popoverField} key={index}>
-          <span>{field.label}</span>
-          {field.multiline ? (
-            <textarea
-              value={field.value}
-              onChange={(event) => field.onChange(event.target.value)}
-              rows={3}
-              autoFocus={index === 0}
-            />
-          ) : (
-            <input
-              value={field.value}
-              onChange={(event) => field.onChange(event.target.value)}
-              autoFocus={index === 0}
-            />
-          )}
-        </label>
-      ))}
       <span className={styles.popoverActions}>
         <button type="button" className={styles.popoverCancel} onClick={onCancel} disabled={pending}>
           Cancel
@@ -58,6 +45,20 @@ export function EditPopover({ fields, onSave, onCancel, pending, saveLabel }: Ed
           {pending ? "Saving…" : (saveLabel ?? "Save")}
         </button>
       </span>
+      {fields.map((field, index) => (
+        <label className={styles.popoverField} key={index}>
+          <span>{field.label}</span>
+          {field.multiline ? (
+            <textarea
+              value={field.value}
+              onChange={(event) => field.onChange(event.target.value)}
+              rows={3}
+            />
+          ) : (
+            <input value={field.value} onChange={(event) => field.onChange(event.target.value)} />
+          )}
+        </label>
+      ))}
     </span>
   );
 }
